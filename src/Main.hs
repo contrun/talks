@@ -242,11 +242,11 @@ internalLinkTransform route = walkM (internalLinkTransform' route)
 
 internalLinkTransform' :: FilePath -> Inline -> Compiler Inline
 internalLinkTransform' route orig@(Link attr inl (url, title)) = do
-  res <- getIdentifierURLCompiler route (fromFilePath url)
+  res <- getIdentifierURLCompiler route (fromFilePath $ T.unpack url)
   return $ go res
   where
     go :: (Store.Result String) -> Inline
-    go (Store.Found newUrl) = Link attr inl (newUrl, title)
+    go (Store.Found newUrl) = Link attr inl (T.pack newUrl, title)
     go _ = orig
 internalLinkTransform' _ x = return x
 
