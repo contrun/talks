@@ -119,7 +119,7 @@
 <ul>
 <li>软件事务内存可以带来数据库事务 acid 保证中的 aci</li>
 <li>STM有一个无与伦比的优势——composable</li>
-<li>STM 看起来和</li>
+<li>美妙的抽象让 STM 看起来就像普通代码块加上 synchronized</li>
 </ul>
 <h2 id="一个新的魔术">一个新的魔术</h2>
 <div class="sourceCode" id="cb5"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">def</span> <span class="fu">transfer</span>(sender: TRef[Int], receiver: TRef[Int], much: Int): UIO[Unit] =</span>
