@@ -41,11 +41,11 @@
 <h2 id="并发问题">并发问题</h2>
 <p>并发很难。为什么不找一些聪明人, once and for all 解决掉这个问题呢？</p>
 <ul>
-<li>我们创造了很多 lock-free, wait-free 的数据结构，</li>
-<li>我们创造了 event loop，</li>
-<li>我们创造了 actor model，</li>
-<li>我们创造了 reactive streams。</li>
-<li>我们创造了 communicating sequential processes。</li>
+<li>我们创造了很多 lock-free, wait-free 的数据结构</li>
+<li>我们创造了 event loop</li>
+<li>我们创造了 actor model</li>
+<li>我们创造了 reactive streams</li>
+<li>我们创造了 communicating sequential processes</li>
 </ul>
 <h2 id="digression">Digression</h2>
 <p><img src="../pictures/meta-programming-hard.jpg" /></p>
@@ -55,7 +55,7 @@
 <li>银行不希望凭空产生出新的美刀(只有美联储才能印币)</li>
 <li>Bob 不希望少收到一分钱</li>
 </ul>
-<h2 id="navie-实现-1">navie 实现 1</h2>
+<h2 id="navie-实现-1garbage-in-garbage-out">navie 实现 1——garbage in garbage out</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">def</span> <span class="fu">transfer</span>(sender: Account, receiver: Account, much: Int) {</span>
 <span id="cb1-2"><a href="#cb1-2"></a>   <span class="kw">while</span> (sender.<span class="fu">balance</span> &lt; much) {}</span>
 <span id="cb1-3"><a href="#cb1-3"></a>   receiver.<span class="fu">balance</span>.<span class="fu">update</span>(_ + much)</span>
@@ -63,11 +63,12 @@
 <span id="cb1-5"><a href="#cb1-5"></a>}</span></code></pre></div>
 <ul>
 <li>只有在 sender 余额足够多的时候才发起转账</li>
-<li>整个转账过程是 atomic 的</li>
+<li>整个转账过程 atomic</li>
+<li>Account 本身不是线程安全，上面的保证就没法做到</li>
+<li>actor, channels 有帮助吗？</li>
 <li>不能保证跨 channel, actor 的操作是线程安全</li>
 </ul>
-<h2 id="navie-实现-2">navie 实现 2</h2>
-<p>回到 good old days。</p>
+<h2 id="navie-实现-2oldie-but-goodie">navie 实现 2——oldie but goodie?</h2>
 <div class="sourceCode" id="cb2"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">def</span> <span class="fu">transfer</span>(sender: Account, receiver: Account, much: Int) {</span>
 <span id="cb2-2"><a href="#cb2-2"></a>   <span class="kw">while</span> (sender.<span class="fu">balance</span> &lt; much) {}</span>
 <span id="cb2-3"><a href="#cb2-3"></a>   sender.<span class="fu">lock</span>()</span>
@@ -82,59 +83,58 @@
 <li>解决方案，让所有帐号编程一个全序集，规定锁的顺序</li>
 <li>lost wake up，成功执行 <code>sender.lock()</code> 的时候，sender的余额可能已经发生变化</li>
 <li>解决方案，请几个小心一点的程序员，多写个 while</li>
-<li>ABA problem，另外一些意想不到的东西已经发生变化，尽管看起来值还是一样的</li>
-<li>解决方案，请几个小心一点的程序员， <code>AtomicStampedReference</code></li>
 <li>Lousy abstraction，poor modularity</li>
 </ul>
 <h2 id="digression-1">Digression</h2>
 <p><img src="../pictures/10th-year-of-using-mutexes.png" /></p>
 <h2 id="navie-想法">navie 想法</h2>
 <ul>
-<li>为什么不用数据库呢？如果你也用过数据库。</li>
+<li>为什么不用数据库呢？</li>
 </ul>
 <div class="sourceCode" id="cb3"><pre class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1"></a>beginTransaction;</span>
 <span id="cb3-2"><a href="#cb3-2"></a>  accountB <span class="op">+=</span> <span class="dv">100</span>;</span>
 <span id="cb3-3"><a href="#cb3-3"></a>  accountA <span class="op">-=</span> <span class="dv">100</span>;</span>
 <span id="cb3-4"><a href="#cb3-4"></a>commitTransaction;</span></code></pre></div>
 <ul>
-<li>这是什么魔法？</li>
+<li>It just works (TM).</li>
+<li>magic</li>
 </ul>
-<h2 id="软件事物内存">软件事物内存</h2>
+<h2 id="软件事务内存">软件事务内存</h2>
 <ul>
 <li>欢迎来到一个全新的魔法世界</li>
-<li>软件事物内存的原理和实现和数据库事务基本相同，乐观锁</li>
-<li>将改动保存在tls，检查数据是否有效，如有效则commit，否则 sudo commit</li>
+<li>软件事务内存的原理和实现和数据库事务基本相同，乐观锁</li>
+<li>将改动保存在线程局部存储，检查数据是否有效，如有效则 commit，否则 sudo commit</li>
 </ul>
 <div class="sourceCode" id="cb4"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">while</span>(!<span class="fu">commitTransaction</span>()) {</span>
 <span id="cb4-2"><a href="#cb4-2"></a>  sudo <span class="fu">commitTransaction</span>()</span>
 <span id="cb4-3"><a href="#cb4-3"></a>}</span></code></pre></div>
 <h2 id="digression-2">Digression</h2>
 <p><img src="../pictures/sudo.jpg" /></p>
+<h2 id="软件事务内存-1">软件事务内存</h2>
 <ul>
-<li>软件事物内存可以带来数据库事物 acid 保证中的 aci</li>
+<li>软件事务内存可以带来数据库事务 acid 保证中的 aci</li>
 <li>STM有一个无与伦比的优势——composable</li>
+<li>STM 看起来和</li>
 </ul>
 <h2 id="一个新的魔术">一个新的魔术</h2>
 <div class="sourceCode" id="cb5"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">def</span> <span class="fu">transfer</span>(sender: TRef[Int], receiver: TRef[Int], much: Int): UIO[Unit] =</span>
 <span id="cb5-2"><a href="#cb5-2"></a>  STM.<span class="fu">atomically</span> {</span>
 <span id="cb5-3"><a href="#cb5-3"></a>    <span class="kw">for</span> {</span>
 <span id="cb5-4"><a href="#cb5-4"></a>      balance &lt;- sender.<span class="fu">get</span></span>
-<span id="cb5-5"><a href="#cb5-5"></a>      _ &lt;- STM.<span class="fu">check</span>(balance &gt;= much) <span class="co">// block until</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a>      _ &lt;- receiver.<span class="fu">update</span>(_ + much)</span>
-<span id="cb5-7"><a href="#cb5-7"></a>      _ &lt;- sender.<span class="fu">update</span>(_ - much)</span>
-<span id="cb5-8"><a href="#cb5-8"></a>    } <span class="kw">yield</span> ()</span>
-<span id="cb5-9"><a href="#cb5-9"></a>  }</span></code></pre></div>
-<ul>
-<li>去掉函数签名里面怪异的类型，和怪异的 <code>STM.atomically</code></li>
-</ul>
+<span id="cb5-5"><a href="#cb5-5"></a>      <span class="co">// block until condition is satisfied</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a>      _ &lt;- STM.<span class="fu">check</span>(balance &gt;= much)</span>
+<span id="cb5-7"><a href="#cb5-7"></a>      _ &lt;- receiver.<span class="fu">update</span>(_ + much)</span>
+<span id="cb5-8"><a href="#cb5-8"></a>      _ &lt;- sender.<span class="fu">update</span>(_ - much)</span>
+<span id="cb5-9"><a href="#cb5-9"></a>    } <span class="kw">yield</span> ()</span>
+<span id="cb5-10"><a href="#cb5-10"></a>  }</span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">def</span> <span class="fu">transfer</span>(sender: Account, receiver: Account, much: Int) {</span>
 <span id="cb6-2"><a href="#cb6-2"></a>   <span class="kw">while</span> (sender.<span class="fu">balance</span> &lt; much) {}</span>
 <span id="cb6-3"><a href="#cb6-3"></a>   receiver.<span class="fu">balance</span>.<span class="fu">update</span>(_ + much)</span>
 <span id="cb6-4"><a href="#cb6-4"></a>   sender.<span class="fu">balance</span>.<span class="fu">update</span>(_ - much)</span>
 <span id="cb6-5"><a href="#cb6-5"></a>}</span></code></pre></div>
 <ul>
-<li>可以看到这和之前的代码并无二致。</li>
-<li>但是 It just works (TM).</li>
+<li>去掉函数签名里面怪异的类型，和怪异的 <code>STM.atomically</code>, 这与之前的代码并无二致。</li>
+<li>It just works (TM).</li>
 </ul>
 <h2 id="魔鬼隐藏在细节中">魔鬼隐藏在细节中</h2>
 <div class="sourceCode" id="cb7"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1"></a>values = <span class="fu">getValues</span>()</span>
@@ -153,12 +153,12 @@
 <h1 id="ziostm-介绍">ZIO/STM 介绍</h1>
 <h2 id="zio-介绍">ZIO 介绍</h2>
 <ul>
-<li>touted as A type-safe, composable library for async and concurrent programming in Scala</li>
+<li>touted as A type-safe, composable library for async and concurrent programming</li>
 <li>实际上是一个 effects library</li>
-<li><code>ZIO[R, E, A]</code>, 给定一个类型为 <code>R</code> 的请求，得到类型为 <code>E</code> 的错误，或者类型为 <code>A</code> 的正确结果</li>
+<li><code>ZIO[R, E, A]</code>, 给定类型为 <code>R</code> 的请求，得到类型为 <code>E</code> 的错误，或类型为 <code>A</code> 的正确值</li>
 <li><code>R</code> for requests，可以理解成 resource</li>
 <li>不同的场景需要不同的资源，Console with Config with Database，带来不同的 effects</li>
-<li><code>ZIO.provide</code> 某个资源可以消除对某个资源的依赖，可以理解成依赖注入，或者是生成一个含有需要资源的闭包</li>
+<li><code>ZIO.provide</code> 某个资源可以消除对某个资源的依赖，depenency injection done right</li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">val</span> clockLayer: ZLayer[Any, Nothing, Clock] = ???</span>
 <span id="cb8-2"><a href="#cb8-2"></a><span class="kw">val</span> zio: ZIO[Clock <span class="kw">with</span> Random, Nothing, Unit] = ???</span>
@@ -166,9 +166,9 @@
 <ul>
 <li>free at last，你会希望使用的都是 pure functions，没有任何 effects 的纯函数</li>
 </ul>
-<h2 id="a-match-in-the-heaven.">a match in the heaven.</h2>
+<h2 id="stm-and-pureness-a-match-in-the-heaven.">STM and pureness, a match in the heaven.</h2>
 <p><img src="../pictures/print-is-no-more.jpg" /></p>
-<h2 id="digression-4">Digression</h2>
+<h2 id="stm-and-pureness-a-match-in-the-heaven.-1">STM and pureness, a match in the heaven.</h2>
 <ul>
 <li>纯函数式编程可以将纯函数和有副作用的 actions, effects 隔离开来</li>
 <li>纯函数的世界里没有冠状病毒，没有死亡，可以任意回滚</li>
@@ -177,7 +177,7 @@
 </ul>
 <div class="sourceCode" id="cb9"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1"></a>STM.<span class="fu">atomically</span>(queue.<span class="fu">take</span>).<span class="fu">flatMap</span>(x =&gt; <span class="fu">putStrLn</span>(x)).<span class="fu">forever</span>.<span class="fu">timeout</span>(<span class="fl">5.</span>seconds)</span></code></pre></div>
 <ul>
-<li>我 declare 我要改变sender的余额，我要改变receiver的余额。请帮我把这两个事务复合成一个事务</li>
+<li>The imperative way</li>
 </ul>
 <div class="sourceCode" id="cb10"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1"></a><span class="kw">def</span> <span class="fu">transfer</span>(sender: Account, receiver: Account, much: Int) {</span>
 <span id="cb10-2"><a href="#cb10-2"></a>   <span class="kw">while</span> (sender.<span class="fu">balance</span> &lt; much) {}</span>
@@ -188,6 +188,9 @@
 <span id="cb10-7"><a href="#cb10-7"></a>   receiver.<span class="fu">balance</span>.<span class="fu">update</span>(_ + much)</span>
 <span id="cb10-8"><a href="#cb10-8"></a>   receiver.<span class="fu">unlock</span>()</span>
 <span id="cb10-9"><a href="#cb10-9"></a>}</span></code></pre></div>
+<ul>
+<li>The declarative way</li>
+</ul>
 <div class="sourceCode" id="cb11"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">def</span> <span class="fu">transfer</span>(sender: TRef[Int], receiver: TRef[Int], much: Int): UIO[Unit] =</span>
 <span id="cb11-2"><a href="#cb11-2"></a>  STM.<span class="fu">atomically</span> {</span>
 <span id="cb11-3"><a href="#cb11-3"></a>    <span class="kw">for</span> {</span>
@@ -203,10 +206,10 @@
 </ul>
 <h2 id="yet-another-certainly-harmful-monad-tutorial">Yet another certainly harmful monad tutorial</h2>
 <ul>
-<li>所以 ZIO 里面的 STM 到底是个啥？是个 monad。</li>
-<li><code>UIO[A]</code> 理解成为计算过程的抽象，这个过程执行完毕可以得到一个类型为A的结果a</li>
+<li>所以 ZIO 里面的 STM 到底是个啥？是个 monad</li>
+<li><code>UIO[A]</code> 理解成为计算过程的抽象，这个过程执行完毕可以得到一个类型为 <code>A</code> 的结果 <code>a</code></li>
 <li><code>flatMap(ua: UIO[A], f: (A -&gt; UIO[B])): UIO[B]</code></li>
-<li>从计算过程 <code>UIO[A]</code> 得到结果 <code>a</code> ，然后喂给 <code>(A -&gt; UIO[B])</code> 得到 <code>UIO[B]</code> ，最终执行得到结果 <code>B</code></li>
+<li>从计算过程 <code>UIO[A]</code> 得到结果 <code>a</code> ，喂给 <code>(A -&gt; UIO[B])</code> ，再执行得到结果 <code>b</code></li>
 <li>两个事务的组合其实也是如此</li>
 </ul>
 <div class="sourceCode" id="cb12"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">for</span> {</span>
@@ -215,19 +218,22 @@
 <span id="cb12-4"><a href="#cb12-4"></a>} <span class="kw">yield</span> ()</span></code></pre></div>
 <ul>
 <li>实现上来说我们需要定义，怎么从一个 <code>USTM[Int]</code> 里面取出 <code>Int</code> (<code>balance &lt;- sender.get</code>)</li>
+<li>上面的说法几乎有害，只需要 <code>map</code> ，能够取出东西的叫 <code>comonad</code></li>
 <li>怎么样把 <code>USTM[A] -&gt; (A -&gt; USTM[B)]</code> 变成一个 <code>USTM[B]</code> (<code>STM.check(balance &gt;= much)==</code>)</li>
 <li>declarative programming 让我们不需要管这么多细节，我们先看下这样的抽象的威力</li>
 </ul>
 <h2 id="dining-philosophers">Dining philosophers</h2>
-<h2 id="digression-5">Digression</h2>
+<h2 id="digression-4">Digression</h2>
 <p><img src="../pictures/dining-philosophers-problem.jpg" /></p>
+<h2 id="dining-philosophers-1">Dining philosophers</h2>
 <ul>
 <li>要让每一个哲学家吃上意大利面，即使他是苏格拉底，fuck historians</li>
-<li>要让每个哲学家用两个叉子吃意大利面</li>
-</ul>
-<ul>
+<li>要让每个哲学家用两个叉子吃意大利面 (我写意大利面代码也要几个 forks)</li>
 <li>吃意大利面的精髓在于不要让拿叉子的过程打环</li>
 <li>其实这个之前说的转账死锁就是两个哲学家在吃意大利面打环了</li>
+</ul>
+<p><code>transfer(sender, receiver, much1)</code> <code>transfer(receiver, sender, much2)</code></p>
+<ul>
 <li>如何用 STM 解决 Dining philosophers 问题？</li>
 </ul>
 <div class="sourceCode" id="cb13"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1"></a><span class="kw">val</span> leftFork = <span class="fu">forks</span>(n)</span>
@@ -240,15 +246,15 @@
 <span id="cb13-8"><a href="#cb13-8"></a>  _ &lt;- leftFork.<span class="fu">release</span>()</span>
 <span id="cb13-9"><a href="#cb13-9"></a>} <span class="kw">yield</span> ()</span></code></pre></div>
 <ul>
-<li>你应该对这样的东西感到极端 skeptical</li>
+<li>你应该对这样的东西感到极端 skeptical，感觉像是作弊了</li>
 </ul>
-<h2 id="digression-6">Digression</h2>
+<h2 id="digression-5">Digression</h2>
 <p><img src="../pictures/the-code-works.png" /></p>
+<h2 id="dining-philosophers-2">Dining philosophers</h2>
 <ul>
 <li>因为这种写法看起来已经打环</li>
 <li>It just works (TM).</li>
-</ul>
-<ul>
+<li>Come and see.</li>
 <li>我虽然不知道它是怎么工作的，但它就能工作！</li>
 <li>真正的魔法是在于 STM 这个 monad 的定义</li>
 <li>declarative programming or concurrency for dummies</li>
@@ -260,7 +266,7 @@
 <ul>
 <li>我们这个啊，是 high level review</li>
 </ul>
-<h2 id="digression-7">Digression</h2>
+<h2 id="digression-6">Digression</h2>
 <p><img src="../pictures/high-level.png" /></p>
 <h2 id="stm-vs-io">STM vs IO</h2>
 <ul>
@@ -285,8 +291,8 @@
 <span id="cb15-7"><a href="#cb15-7"></a>}</span></code></pre></div>
 <ul>
 <li>获取当前的值，对比是否依旧是当前值，如果是，用新的值覆盖当前值，如果不是，重试</li>
-<li>获取当前值，执行操作，验证当前值的有效性，如果无效，回滚 transaction 并重试，否则commit</li>
-<li>compareAndSet 是 atomic 的，我们需要保证我们的整个过程是 linerizable 的</li>
+<li>获取当前值，执行操作，验证当前值的有效性，如果无效，回滚并重试，否则commit</li>
+<li>compareAndSet 天然 atomic，我们需要保证我们的整个过程 linerizable</li>
 </ul>
 <h2 id="回滚">回滚</h2>
 <ul>
@@ -310,8 +316,8 @@
 <span id="cb16-9"><a href="#cb16-9"></a>} <span class="kw">yield</span> ()</span></code></pre></div>
 <ul>
 <li>依次执行 continuation 的时候会将访问的所有 atomic reference 记录到 expected</li>
-<li>验证过程就是验证所有的 atomic reference 的 expecetd == current</li>
-<li>为了保证 linearizable 或者其他的一致性条件，可以使用下面的 concurrency control</li>
+<li>验证过程就是验证所有的 atomic reference 的 <code>expecetd == current</code></li>
+<li>为了保证 linearizable 或者其他的一致性条件，要使用 concurrency control</li>
 </ul>
 <h2 id="coarse-grain-concurrency-control">Coarse grain concurrency control</h2>
 <ul>
@@ -330,16 +336,17 @@
 <p>一点小小的搬运工作，谢谢大家。</p>
 <h1 id="参考资料">参考资料</h1>
 <ul>
-<li><a href="https://github.com/contrun/stm-problems-zio/">上面例子的源代码</a></li>
-<li><a href="https://www.microsoft.com/en-us/research/publication/composable-memory-transactions/">可以复合的 STM 的主要参考论文(用的 Haskell)</a></li>
-<li><a href="https://www.amazon.com/Art-Multiprocessor-Programming-Revised-Reprint/dp/0123973376/">一本关于 wait-less, lock-less 数据结构的教科书，最后一章是事务内存</a></li>
-<li><a href="https://www.schoolofhaskell.com/user/simonpj/beautiful-concurrency">另外一个 STM 介绍，用 STM 来解决圣诞老人问题</a></li>
-<li><a href="http://java.ociweb.com/mark/stm/article.html">Clojure stm 介绍</a></li>
-<li><a href="http://cs.brown.edu/~mph/HerlihyM93/herlihy93transactional.pdf">在硬件层面上事务内存的论文</a><a href="https://www.microsoft.com/en-us/research/publication/lock-free-data-structures-using-stms-in-haskell/">使用 STM 实现一些常用并发数据结构</a></li>
-<li><a href="https://www.youtube.com/watch?v=d6WWmia0BPM">ZIO STM 的介绍，以及使用 STM 来实现一些常用的并发数据结构</a></li>
-<li><a href="https://www.oreilly.com/library/view/parallel-and-concurrent/9781449335939/">https://www.oreilly.com/library/view/parallel-and-concurrent/9781449335939/</a></li>
-<li><a href="https://github.com/snoyberg/why-you-should-use-stm">没有回答标题的 why，会 Walk through haskell stm</a></li>
-<li><a href="https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/stm">haskell runtime 里的 stm</a></li>
+<li><a href="https://github.com/contrun/stm-problems-zio/">stm-problem-zio</a> (上面例子的源代码)</li>
+<li><a href="https://www.microsoft.com/en-us/research/publication/composable-memory-transactions/">Composable memory transactions</a> (可以复合的 STM 的主要参考论文(用的 Haskell))</li>
+<li><a href="https://www.amazon.com/Art-Multiprocessor-Programming-Revised-Reprint/dp/0123973376/">The Art of Multiprocessor Programming</a> (一本关于 wait-less, lock-less 数据结构的教科书，最后一章是事务内存)</li>
+<li><a href="https://www.microsoft.com/en-us/research/publication/beautiful-concurrency/">Beautiful concurrency</a> (另外一个 STM 介绍，用 STM 来解决圣诞老人问题)</li>
+<li><a href="http://java.ociweb.com/mark/stm/article.html">Software Transactional Memory</a> (Clojure stm 介绍)</li>
+<li><a href="http://cs.brown.edu/~mph/HerlihyM93/herlihy93transactional.pdf">Transactional Memory: Architectural Support for Lock-Free Data Structures</a> (在硬件层面上事务内存的论文)</li>
+<li><a href="https://www.microsoft.com/en-us/research/publication/lock-free-data-structures-using-stms-in-haskell/">Lock Free Data Structures using STMs in Haskell</a> (使用 STM 实现一些常用并发数据结构)</li>
+<li><a href="https://www.youtube.com/watch?v=d6WWmia0BPM">ATOMICALLY { DELETE YOUR ACTORS }</a> (ZIO STM 的介绍，以及使用 STM 来实现一些常用的并发数据结构)</li>
+<li><a href="https://www.oreilly.com/library/view/parallel-and-concurrent/9781449335939/">Parallel and Concurrent Programming in Haskell</a></li>
+<li><a href="https://github.com/snoyberg/why-you-should-use-stm">Why you should use Software Transactional Memory</a> (Walk through haskell stm，没有回答标题的 why)</li>
+<li><a href="https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/rts/stm">GHC Commentary: Software Transactional Memory (STM)</a> (ghc runtime system 里的 stm)</li>
 </ul>
 
 
