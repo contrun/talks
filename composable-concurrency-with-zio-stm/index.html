@@ -37,6 +37,7 @@
 <p>zio/stm简介</p>
 <p>一个例子</p>
 <p>一些实现细节</p>
+<p>总结</p>
 <h1 id="引子">引子</h1>
 <h2 id="并发问题">并发问题</h2>
 <p>并发很难。为什么不找一些聪明人, once and for all 解决掉这个问题呢？</p>
@@ -201,6 +202,7 @@
 <span id="cb11-8"><a href="#cb11-8"></a>    } <span class="kw">yield</span> ()</span>
 <span id="cb11-9"><a href="#cb11-9"></a>  }</span></code></pre></div>
 <ul>
+<li>explict lock vs synchronized</li>
 <li>declaration as an abstract barrier</li>
 <li>更加地 composable，更加地 modular，更加地 robust</li>
 </ul>
@@ -280,7 +282,7 @@
 <span id="cb14-3"><a href="#cb14-3"></a>)</span></code></pre></div>
 <h2 id="compare-and-set">Compare and Set</h2>
 <ul>
-<li>compareAndSet, 几乎所有的 lock-free 数据结构之母</li>
+<li>compareAndSet, 几乎所有的 lock-free 算法之母</li>
 </ul>
 <div class="sourceCode" id="cb15"><pre class="sourceCode scala"><code class="sourceCode scala"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw">def</span> <span class="fu">getAndSet</span>(a: A): A {</span>
 <span id="cb15-2"><a href="#cb15-2"></a>  <span class="kw">while</span> (<span class="kw">true</span>) {</span>
@@ -331,6 +333,13 @@
 <li>锁了对应的 row</li>
 <li>multi version concurrency control</li>
 <li>验证的时候，顺便锁了 write set 里面的 atomic reference</li>
+</ul>
+<h1 id="总结">总结</h1>
+<ul>
+<li>实现了 STM 的数据结构，并发修改的结果要么就是 all 要么是 none</li>
+<li>STM 的最大优势在于可以复合多个事务，生成一个具有 aci 保证的事务</li>
+<li>ZIO STM 效果拔群，因为 side-effect free 和 declarative</li>
+<li>可以用 STM 来实现很多常用的并发数据结构</li>
 </ul>
 <h1 id="谢谢">谢谢</h1>
 <p>一点小小的搬运工作，谢谢大家。</p>
