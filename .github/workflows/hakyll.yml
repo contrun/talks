@@ -1,0 +1,67 @@
+name: Hakyll site CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc: [ '8.8.3' ]
+        cabal: [ '3.0' ]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: actions/cache@v1
+      name: cache ~/.npm
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    - uses: actions/setup-node@v1
+    - run: npm install
+
+    - uses: actions/setup-haskell@v1
+      with:
+        ghc-version: ${{ matrix.ghc }}
+        cabal-version: ${{ matrix.cabal }}
+    - name: Cache ~/.cabal/store
+      uses: actions/cache@v1
+      with:
+        path: ~/.cabal/store
+        key: cabal-store-${{ runner.OS }}-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
+        restore-keys: |
+          cabal-store-${{ runner.OS }}-${{ matrix.ghc }}-
+          cabal-store-${{ runner.OS }}-
+    - name: Cache dist-newstyle
+      uses: actions/cache@v1
+      with:
+        path: dist-newstyle
+        key: dist-newstyle-${{ runner.OS }}-${{ matrix.ghc }}-${{ hashFiles('cabal.project.freeze') }}
+        restore-keys: |
+          dist-newstyle-${{ runner.OS }}-${{ matrix.ghc }}-
+          dist-newstyle-${{ runner.OS }}-
+    - name: Update the package list
+      run: |
+        cabal update
+    - name: Build dependencies and the site generator
+      run: |
+        cabal build
+    - name: Build the site
+      env:
+        LANG: en_US.UTF-8
+      # build it two times to generate the correct metadata
+      run: |
+        cabal exec site -- build
+        cabal exec site -- build
+    - name: Check the site output
+      run: |
+        cabal exec site -- check
+
+    - uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
+        publish_branch: gh-pages

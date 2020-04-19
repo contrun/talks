@@ -1,0 +1,45 @@
+node:
+  stage: .pre
+  image: node:latest
+  cache:
+    key:
+      files:
+        - package-lock.json
+      prefix: node
+    paths:
+      - .npm
+      - node_modules
+  script:
+    - npm ci --cache .npm --prefer-offline
+
+build:
+  stage: build
+  image: haskell:latest
+  cache:
+    key:
+      files:
+        - cabal.project.freeze
+      prefix: cabal
+    paths:
+      - .cabal
+      - dist-newstyle
+  variables:
+    CABAL_STORE: "$CI_PROJECT_DIR/.cabal"
+  before_script:
+    - cabal --store-dir "$CABAL_STORE" update
+    - cabal --store-dir "$CABAL_STORE" build
+  script:
+    - cabal exec site -- build
+    - cabal exec site -- build
+    - cabal exec site -- check
+  timeout: 5 hours
+
+pages:
+  stage: deploy
+  script:
+    - ls public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master

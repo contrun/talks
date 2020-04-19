@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  $if(mathRender)$
+  $mathRender$
+  $endif$
+  <link rel="stylesheet" type="text/css" href="/css/syntax.css">
+  <link rel="stylesheet" type="text/css" href="/css/tufte.css">
+  <link rel="stylesheet" type="text/css" href="/css/custom.css">
+  $if(index_page)$
+  <title>$siteTitle$</title>
+  $else$
+  <title>$title$ - $siteTitle$</title>
+  $endif$
+</head>
+<body>
+  $partial("templates/nav.html")$
+  <article>
+    <section>
+      $body$
+    </section>
+  </article>
+  $partial("templates/footer.html")$
+</body>
+</html>
