@@ -7,6 +7,7 @@ import Data.Char (isAlphaNum)
 import Data.Char
   ( toLower,
   )
+import Data.Functor.Identity (runIdentity)
 import Data.List
   ( find,
     intercalate,
@@ -32,6 +33,7 @@ import System.FilePath.Posix
   )
 import Text.Pandoc.Definition
 import Text.Pandoc.Options
+import qualified Text.Pandoc.Templates as PT (Template, compileTemplate)
 import Text.Pandoc.Walk
 
 --------------------------------------------------------------------------------
@@ -169,7 +171,7 @@ cleanIndex url
 --------------------------------------------------------------------------------
 myDefaultContext :: Context String
 myDefaultContext =
-  constField "siteTitle" "untitled"
+  constField "siteTitle" "contrun's personal wiki"
     <> defaultContext
 
 postCtx :: Context String
@@ -205,6 +207,15 @@ mathCtx = field "mathRender" $ \item -> do
       Just "0" -> ""
       _ -> katexScript
 
+readBoolOption :: String -> Bool
+readBoolOption x = elem (map toLower x) ["on", "yes", "true", "1"]
+
+enableTOC :: Bool
+enableTOC = False
+
+enableNumberSections :: Bool
+enableNumberSections = False
+
 customPandocCompiler :: Compiler (Item String)
 customPandocCompiler = do
   let mathExtensions =
@@ -220,6 +231,9 @@ customPandocCompiler = do
   let newExtensions = defaultExtensions <> mathExtensions
   identifier <- getUnderlying
   mathOption <- getMetadataField identifier "math"
+  tocOption <- getMetadataField identifier "enabletoc"
+  numberSectionsOption <- getMetadataField identifier "enablenumbersections"
+  let enableToc = fromMaybe enableTOC $ fmap readBoolOption tocOption
   path <- getResourceFilePath
   let writerOptions =
         defaultHakyllWriterOptions
@@ -227,9 +241,21 @@ customPandocCompiler = do
             writerHTMLMathMethod = case fmap (map toLower) mathOption of
               Just "mathml" -> MathML
               _ | enableMathml -> MathML
-              _ -> MathJax ""
+              _ -> MathJax "",
+            writerNumberSections = fromMaybe enableNumberSections $ fmap readBoolOption numberSectionsOption,
+            writerTableOfContents = enableTOC,
+            writerTOCDepth = 3,
+            writerTemplate = if enableTOC then Just tocTemplate else Nothing
           }
   pandocCompilerWithTransformM defaultHakyllReaderOptions writerOptions (internalLinkTransform path)
+
+tocTemplate :: PT.Template T.Text
+tocTemplate = case runIdentity $ PT.compileTemplate "" tmpl of
+  Left err -> error err
+  Right template -> template
+  where
+    tmpl =
+      "\n<div class=\"toc\"><div class=\"header\">Table of Contents</div>\n$toc$\n</div>\n$body$"
 
 keepAlphaNum :: Char -> Char
 keepAlphaNum x
