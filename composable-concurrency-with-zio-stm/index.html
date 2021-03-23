@@ -40,31 +40,23 @@
 <li><a href="#引子">引子</a>
 <ul>
 <li><a href="#并发问题">并发问题</a></li>
-<li><a href="#digression">Digression</a></li>
 <li><a href="#一个例子">一个例子</a></li>
 <li><a href="#navie-实现-1">navie 实现 1</a></li>
 <li><a href="#navie-实现-2">navie 实现 2</a></li>
-<li><a href="#digression-1">Digression</a></li>
 <li><a href="#navie-想法">navie 想法</a></li>
 <li><a href="#软件事物内存">软件事物内存</a></li>
-<li><a href="#digression-2">Digression</a></li>
 <li><a href="#一个新的魔术">一个新的魔术</a></li>
 <li><a href="#魔鬼隐藏在细节中">魔鬼隐藏在细节中</a></li>
-<li><a href="#digression-3">Digression</a></li>
 </ul></li>
 <li><a href="#ziostm-介绍">ZIO/STM 介绍</a>
 <ul>
 <li><a href="#zio-介绍">ZIO 介绍</a></li>
 <li><a href="#a-match-in-the-heaven.">a match in the heaven.</a></li>
-<li><a href="#digression-4">Digression</a></li>
 <li><a href="#yet-another-certainly-harmful-monad-tutorial">Yet another certainly harmful monad tutorial</a></li>
 <li><a href="#dining-philosophers">Dining philosophers</a></li>
-<li><a href="#digression-5">Digression</a></li>
-<li><a href="#digression-6">Digression</a></li>
 </ul></li>
 <li><a href="#一些实现细节">一些实现细节</a>
 <ul>
-<li><a href="#digression-7">Digression</a></li>
 <li><a href="#stm-vs-io">STM vs IO</a></li>
 <li><a href="#compare-and-set">Compare and Set</a></li>
 <li><a href="#回滚">回滚</a></li>
@@ -86,7 +78,6 @@
 <li>我们创造了 reactive streams。</li>
 <li>我们创造了 communicating sequential processes。</li>
 </ul>
-<h2 id="digression">Digression</h2>
 <p><img src="../pictures/meta-programming-hard.jpg" /></p>
 <h2 id="一个例子">一个例子</h2>
 <ul>
@@ -125,7 +116,6 @@
 <li>解决方案，请几个小心一点的程序员， <code>AtomicStampedReference</code></li>
 <li>Lousy abstraction，poor modularity</li>
 </ul>
-<h2 id="digression-1">Digression</h2>
 <p><img src="../pictures/10th-year-of-using-mutexes.png" /></p>
 <h2 id="navie-想法">navie 想法</h2>
 <ul>
@@ -147,7 +137,6 @@
 <div class="sourceCode" id="cb4"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">while</span>(!<span class="fu">commitTransaction</span>()) {</span>
 <span id="cb4-2"><a href="#cb4-2"></a>  sudo <span class="fu">commitTransaction</span>()</span>
 <span id="cb4-3"><a href="#cb4-3"></a>}</span></code></pre></div>
-<h2 id="digression-2">Digression</h2>
 <p><img src="../pictures/sudo.jpg" /></p>
 <ul>
 <li>软件事物内存可以带来数据库事物 acid 保证中的 aci</li>
@@ -187,7 +176,6 @@
 <li>commit 要 linearizable，不能留下任何 inconsistent 的状态</li>
 <li>不是所有改动都能 rollback</li>
 </ul>
-<h2 id="digression-3">Digression</h2>
 <p><img src="../pictures/rollback-to-2019.jpg" /></p>
 <h1 id="ziostm-介绍">ZIO/STM 介绍</h1>
 <h2 id="zio-介绍">ZIO 介绍</h2>
@@ -207,7 +195,6 @@
 </ul>
 <h2 id="a-match-in-the-heaven.">a match in the heaven.</h2>
 <p><img src="../pictures/print-is-no-more.jpg" /></p>
-<h2 id="digression-4">Digression</h2>
 <ul>
 <li>纯函数式编程可以将纯函数和有副作用的 actions, effects 隔离开来</li>
 <li>纯函数的世界里没有冠状病毒，没有死亡，可以任意回滚</li>
@@ -258,7 +245,6 @@
 <li>declarative programming 让我们不需要管这么多细节，我们先看下这样的抽象的威力</li>
 </ul>
 <h2 id="dining-philosophers">Dining philosophers</h2>
-<h2 id="digression-5">Digression</h2>
 <p><img src="../pictures/dining-philosophers-problem.jpg" /></p>
 <ul>
 <li>要让每一个哲学家吃上意大利面，即使他是苏格拉底，fuck historians</li>
@@ -281,7 +267,6 @@
 <ul>
 <li>你应该对这样的东西感到极端 skeptical</li>
 </ul>
-<h2 id="digression-6">Digression</h2>
 <p><img src="../pictures/the-code-works.png" /></p>
 <ul>
 <li>因为这种写法看起来已经打环</li>
@@ -299,7 +284,6 @@
 <ul>
 <li>我们这个啊，是 high level review</li>
 </ul>
-<h2 id="digression-7">Digression</h2>
 <p><img src="../pictures/high-level.png" /></p>
 <h2 id="stm-vs-io">STM vs IO</h2>
 <ul>
