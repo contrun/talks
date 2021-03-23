@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+<script defer type="text/javascript" src="../vendor/katex/katex.min.js"></script>
+<script defer type="text/javascript" src="../vendor/katex/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+  
+  <link rel="stylesheet" type="text/css" href="../css/syntax.css">
+  <link rel="stylesheet" type="text/css" href="../css/tufte.css">
+  <link rel="stylesheet" type="text/css" href="../css/custom.css">
+  
+  <title>The Hitchhiker's Guide to NixOS - contrun's personal wiki</title>
+  
+</head>
+<body>
+        <nav class="group">
+          <a href="../">home</a>
+          <a href="https://github.com/contrun/">github</a>
+      </nav>
+
+  <article>
+    <section>
+      <div class="post_title">
+  <h2 class="post_title"><a href=".././the-hitchhiker-s-guide-to-nixos/">The Hitchhiker's Guide to NixOS</a></h2>
+</div>
+
+<div class="info">
+    Posted on March 23, 2021
+    
+</div>
+
+
+<div class="toc"><div class="header">Table of Contents</div>
+<ul>
+<li><a href="#brave-new-world">Brave New World</a>
+<ul>
+<li><a href="#how-you-build-your-software">How you build your software?</a></li>
+<li><a href="#how-you-build-your-os">How you build your OS?</a>
+<ul>
+<li><a href="#digression">Digression</a></li>
+<li><a href="#entering-nix-flake">Entering nix flake</a></li>
+<li><a href="#show-it-in-action">Show it in action</a></li>
+<li><a href="#three-pillar-of-nix-super-power">Three pillar of nix super power</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#devil-in-the-white-city">Devil in the White City</a>
+<ul>
+<li><a href="#lets-see-who-you-really-are">Let’s see who you really are</a></li>
+<li><a href="#anatomy-of-a-flake-file">Anatomy of a flake file</a></li>
+<li><a href="#anatomy-of-a-nix-derivation">Anatomy of a nix derivation</a>
+<ul>
+<li><a href="#see-it-in-action">See it in action</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ul></li>
+<li><a href="#key-components">Key components</a>
+<ul>
+<li><a href="#nix-the-language">Nix, the language</a></li>
+<li><a href="#nix-the-interpreter">Nix, the interpreter</a></li>
+<li><a href="#nixpkgs-the-package-set">Nixpkgs, the package set</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#the-perks-of-being-a-stoic">The Perks of Being a Stoic</a>
+<ul>
+<li><a href="#me-compiling-github-microsoft-crying">Me compiling, <del>github</del> microsoft crying</a>
+<ul>
+<li><a href="#compiling">Compiling</a></li>
+<li><a href="#github-actions-to-build-my-packages">Github actions to build my packages</a></li>
+<li><a href="#cachix-to-cache-my-build-results">Cachix to cache my build results</a></li>
+</ul></li>
+<li><a href="#nixos-test">nixos test</a>
+<ul>
+<li><a href="#integration-tests">Integration tests</a></li>
+<li><a href="#see-it-in-action-1">See it in action</a></li>
+</ul></li>
+<li><a href="#complex-build-environment">Complex build environment</a>
+<ul>
+<li><a href="#cross-compilation">Cross compilation</a></li>
+<li><a href="#static-linking">Static linking</a></li>
+<li><a href="#see-it-in-action-2">See it in action</a></li>
+</ul></li>
+<li><a href="#build-farms">Build farms</a></li>
+<li><a href="#dev-shells-direnv-for-projects">dev shells, direnv for projects</a></li>
+<li><a href="#atomic-updates-easy-rollback">Atomic updates, Easy rollback</a></li>
+<li><a href="#nixops">nixops</a></li>
+<li><a href="#containers">containers</a></li>
+</ul></li>
+<li><a href="#exciting-times">Exciting Times</a>
+<ul>
+<li><a href="#nice-to-have-improvements">Nice-to-have improvements</a>
+<ul>
+<li><a href="#beginner-friendliness">Beginner-friendliness</a></li>
+<li><a href="#enterprise-grade-applications">Enterprise-grade applications</a></li>
+<li><a href="#versatility">Versatility</a></li>
+</ul></li>
+<li><a href="#all-your-base-are-belong-to-us">All your base are belong to us</a>
+<ul>
+<li><a href="#devos"><span>devos</span></a></li>
+<li><a href="#kubernix"><span>kubernix</span></a></li>
+<li><a href="#nixops-deploy-rs"><span>nixops</span>, <span>deploy-rs</span></a></li>
+<li><a href="#hercules-ci"><span>Hercules CI</span></a></li>
+<li><a href="#trustix"><span>trustix</span></a></li>
+<li><a href="#flox"><span>Flox</span></a></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+<p>Like cargo build, but for your OS.</p>
+<h1 id="brave-new-world">Brave New World</h1>
+<p>Infrastructure as Code</p>
+<h2 id="how-you-build-your-software">How you build your software?</h2>
+<pre class="shell"><code>git clone https://github.com/xxx/yyy.git
+{stack,cargo,cabal,yarn,go,gradlew,sbt,mvn} {build,compile}
+</code></pre>
+<p>or maybe just</p>
+<pre class="shell"><code>{python,lua,ruby,perl} xxx.{py,lua,rb,pl}
+</code></pre>
+<h2 id="how-you-build-your-os">How you build your OS?</h2>
+<h3 id="digression">Digression</h3>
+<p><img src="../pictures/you-guys-are-building-your-own-os.jpg" /></p>
+<h3 id="entering-nix-flake">Entering nix flake</h3>
+<pre class="shell"><code>git clone https://github.com/contrun/dotfiles.git
+cd dotfiles
+nixos-rebuild build --flake .#x86_64-linux
+</code></pre>
+<h3 id="show-it-in-action">Show it in action</h3>
+<pre class="shell"><code>nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel
+nix build .#nixosConfigurations.x86_64-linux.config.system.build.vm
+nix path-info .#nixosConfigurations.x86_64-linux.config.system.build.toplevel -sSh
+QEMU_NET_OPTS=&quot;hostfwd=tcp::2222-:22&quot; ./result/bin/run-*-vm
+ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 e@localhost
+</code></pre>
+<p>Show off my PATH, systemctl status, i3wm, xmonad.</p>
+<h3 id="three-pillar-of-nix-super-power">Three pillar of nix super power</h3>
+<p>I’ve just demonstrated packer + vagrant. Nix is far more powerful.</p>
+<ol>
+<li><p>Reproducible</p>
+<p>Like it solely from a git repo, with all desired packages, configurations.</p></li>
+<li><p>Declarative</p>
+<p>A minimalist language to do all those things, without diving into all the details.</p></li>
+<li><p>Reliable</p>
+<p>Easily roll back to the previous state.</p></li>
+</ol>
+<h1 id="devil-in-the-white-city">Devil in the White City</h1>
+<h2 id="lets-see-who-you-really-are">Let’s see who you really are</h2>
+<p><img src="../pictures/who-this-nix-guy-really-is.jpg" /></p>
+<pre class="shell"><code>nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel
+nix show-derivation
+nix show-derivation $(nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel --json | jq -r '.[0].drvPath') | jq -r '.. | .buildCommand? | select(.)'
+</code></pre>
+<h2 id="anatomy-of-a-flake-file">Anatomy of a flake file</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode nix"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">{</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>  <span class="ex">inputs.nixpkgs.url</span> = <span class="st">&quot;github:NixOS/nixpkgs/nixos-20.09&quot;</span><span class="kw">;</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a>  <span class="ex">outputs</span> = { self, nixpkgs <span class="kw">}</span>: <span class="kw">{</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a></span>
+<span id="cb6-6"><a href="#cb6-6"></a>    <span class="ex">nixosConfigurations.container</span> = nixpkgs.lib.nixosSystem {</span>
+<span id="cb6-7"><a href="#cb6-7"></a>      <span class="ex">system</span> = <span class="st">&quot;x86_64-linux&quot;</span><span class="kw">;</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a>      <span class="ex">modules</span> =</span>
+<span id="cb6-9"><a href="#cb6-9"></a>        [ <span class="kw">({</span> <span class="ex">pkgs</span>, ... <span class="kw">}</span>: <span class="kw">{</span></span>
+<span id="cb6-10"><a href="#cb6-10"></a>            <span class="ex">boot.isContainer</span> = true<span class="kw">;</span></span>
+<span id="cb6-11"><a href="#cb6-11"></a></span>
+<span id="cb6-12"><a href="#cb6-12"></a>            <span class="co"># Let 'nixos-version --json' know about the Git revision</span></span>
+<span id="cb6-13"><a href="#cb6-13"></a>            <span class="co"># of this flake.</span></span>
+<span id="cb6-14"><a href="#cb6-14"></a>            <span class="ex">system.configurationRevision</span> = nixpkgs.lib.mkIf (self ? rev) <span class="ex">self.rev</span><span class="kw">;</span></span>
+<span id="cb6-15"><a href="#cb6-15"></a></span>
+<span id="cb6-16"><a href="#cb6-16"></a>            <span class="co"># Network configuration.</span></span>
+<span id="cb6-17"><a href="#cb6-17"></a>            <span class="ex">networking.useDHCP</span> = false<span class="kw">;</span></span>
+<span id="cb6-18"><a href="#cb6-18"></a>            <span class="ex">networking.firewall.allowedTCPPorts</span> = [ 80 ]<span class="kw">;</span></span>
+<span id="cb6-19"><a href="#cb6-19"></a></span>
+<span id="cb6-20"><a href="#cb6-20"></a>            <span class="co"># Enable a web server.</span></span>
+<span id="cb6-21"><a href="#cb6-21"></a>            <span class="ex">services.httpd</span> = {</span>
+<span id="cb6-22"><a href="#cb6-22"></a>              <span class="bu">enable</span> = true<span class="kw">;</span></span>
+<span id="cb6-23"><a href="#cb6-23"></a>              <span class="ex">adminAddr</span> = <span class="st">&quot;morty@example.org&quot;</span><span class="kw">;</span></span>
+<span id="cb6-24"><a href="#cb6-24"></a>            <span class="kw">}</span>;</span>
+<span id="cb6-25"><a href="#cb6-25"></a>          }<span class="kw">)</span></span>
+<span id="cb6-26"><a href="#cb6-26"></a>        ];</span>
+<span id="cb6-27"><a href="#cb6-27"></a>    <span class="kw">}</span>;</span>
+<span id="cb6-28"><a href="#cb6-28"></a></span>
+<span id="cb6-29"><a href="#cb6-29"></a>  };</span>
+<span id="cb6-30"><a href="#cb6-30"></a>}</span></code></pre></div>
+<pre><code>cd &quot;$(mktemp -d)&quot;
+git init
+git add .
+nixos-container create flake-test --flake .
+nixos-container start flake-test
+curl http://flake-test/
+</code></pre>
+<p>cf <a href="https://www.tweag.io/blog/2020-07-31-nixos-flakes/">Nix Flakes, Part 3: Managing NixOS systems</a></p>
+<h2 id="anatomy-of-a-nix-derivation">Anatomy of a nix derivation</h2>
+<h3 id="see-it-in-action">See it in action</h3>
+<pre class="shell"><code>cat ~/Workspace/nixpkgs/pkgs/applications/misc/hello/default.nix
+nix-shell '&lt;nixpkgs&gt;' -A hello
+declare -f genericBuild
+unpackPhase
+</code></pre>
+<h3 id="conclusion">Conclusion</h3>
+<ul>
+<li>Wait, its always derivations <img src="../pictures/its-all-derivation.png" /></li>
+<li>stdenv to bootstrap toolchain</li>
+<li>setup.sh as a generic build process</li>
+<li>setup-hooks to inject processing logic</li>
+</ul>
+<h2 id="key-components">Key components</h2>
+<h3 id="nix-the-language">Nix, the language</h3>
+<ul>
+<li>Purely functional Strictly separate effectful operations from pure functions. Make the exposure face smaller.</li>
+<li>lazy Make it easy to fill in the blanks later.</li>
+</ul>
+<h3 id="nix-the-interpreter">Nix, the interpreter</h3>
+<ul>
+<li>Evaluate of nix expressions</li>
+<li>Execute impure effects, e.g. download dependencies, store file to the nix store</li>
+</ul>
+<h3 id="nixpkgs-the-package-set">Nixpkgs, the package set</h3>
+<ol>
+<li><p>A large library of functions to build std derivations</p>
+<p>buildPythonPackage, buildGoPackage, buildRustPackage, snapTools.makeSnap, lib.nixosSystem (thus nixos itself is nothing special)</p></li>
+<li><p>A large library of nixos modules</p>
+<p>kernel customization, zsh, emacs, xmonad</p></li>
+<li><p>Some helper functions</p>
+<p>fixed point calculation, string manipulation</p></li>
+</ol>
+<h1 id="the-perks-of-being-a-stoic">The Perks of Being a Stoic</h1>
+<h2 id="me-compiling-github-microsoft-crying">Me compiling, <del>github</del> microsoft crying</h2>
+<p>Don’t cray for me, github and cachix. cf <a href="https://github.com/contrun/dotfiles">https://github.com/contrun/dotfiles</a></p>
+<h3 id="compiling">Compiling</h3>
+<p><img src="../pictures/compiling.png" /></p>
+<h3 id="github-actions-to-build-my-packages">Github actions to build my packages</h3>
+<h3 id="cachix-to-cache-my-build-results">Cachix to cache my build results</h3>
+<p><img src="../pictures/screenshot-2021-03-24-00-19-19.png" /></p>
+<h2 id="nixos-test">nixos test</h2>
+<h3 id="integration-tests">Integration tests</h3>
+<p>You have cassandra, pomerium, a blockchain. You are a distributed system hacker. You don’t emulate distributed system with seperated processes.</p>
+<h3 id="see-it-in-action-1">See it in action</h3>
+<pre class="shell"><code>nix-build ./nixos/tests/pomerium.nix
+nix-instantiate --strict --eval -E 'with import ./nixos/tests/pomerium.nix {}; driver.outPath'
+$(nix-instantiate --strict --eval -E 'with import ./nixos/tests/pomerium.nix {}; driver.outPath' | xargs)/bin/nixos-test-driver
+</code></pre>
+<pre class="pytho"><code>backend.wait_for_unit(&quot;nginx&quot;)
+backend.wait_for_open_port(80)
+pomerium.wait_for_unit(&quot;pomerium&quot;)
+pomerium.wait_for_open_port(80)
+pomerium.succeed(&quot;curl --resolve my.website:80:127.0.0.1 http://my.website | grep -q 'hello world'&quot;)
+</code></pre>
+<h2 id="complex-build-environment">Complex build environment</h2>
+<h3 id="cross-compilation">Cross compilation</h3>
+<p>You need to cross compile a package. I can haz a good cross compilation tool-chain without scratch my heads?</p>
+<h3 id="static-linking">Static linking</h3>
+<p>You need to statically link programs, your program depends on some c library which your package manager does not pack static libraries, e.g. openssl, rocksdb, or the library is not static-linking friendly, e.g. glibc.</p>
+<h3 id="see-it-in-action-2">See it in action</h3>
+<pre class="shell"><code>go build -gcflags 'all=-N -l -m' -ldflags '-extldflags &quot;-static&quot;' ./cmd/ipvpnd/
+ldd ipvpnd
+nix-shell -E 'with import &lt;nixpkgs&gt; {}; pkgsCross.musl64.clangStdenv.mkDerivation { name = &quot;clang-nix-shell&quot;; }'
+go build -gcflags 'all=-N -l -m' -ldflags '-extldflags &quot;-static&quot;' ./cmd/ipvpnd/
+nix-build -E 'with import &lt;nixpkgs&gt; {}; pkgsCross.aarch64-multiplatform-musl.hello'
+file ./result/bin/hello
+qemu-aarch64 ./result/bin/hello
+./result/bin/hello # courtesy for binfmt.emulatedSystems = [ &quot;aarch64-linux&quot; ];
+</code></pre>
+<h2 id="build-farms">Build farms</h2>
+<p>See the above <code>nix-build -E 'with import &lt;nixpkgs&gt; {}; pkgsCross.aarch64-multiplatform-musl.hello'</code>.</p>
+<h2 id="dev-shells-direnv-for-projects">dev shells, direnv for projects</h2>
+<ul>
+<li>Foreign libraries, openssl, rocksdb etc.</li>
+<li>Some projects even customize toolchains, scylla db</li>
+<li>Some projects are just monsters. Android. Chrome.</li>
+<li>Integrations, kernel, databases, caches (just use docker compose?), what about kernel integration?</li>
+<li>compile<sub>commands</sub>.json PATH=“$HOME/.cache/bin:$PATH” dontUnpack=y dontInstall=y dontFixup=y src=. genericBuild</li>
+<li>Case study: <a href="https://docs.haskellstack.org/en/stable/nix_integration/">stack</a></li>
+<li>Case study: <a href="https://github.com/direnv/direnv">direnv</a></li>
+<li>See it in action: <a href="https://github.com/NixOS/nix/">nix</a></li>
+</ul>
+<h2 id="atomic-updates-easy-rollback">Atomic updates, Easy rollback</h2>
+<h2 id="nixops">nixops</h2>
+<h2 id="containers">containers</h2>
+<h1 id="exciting-times">Exciting Times</h1>
+<p><img src="../pictures/all-my-base-are-belong-to-you.png" /></p>
+<h2 id="nice-to-have-improvements">Nice-to-have improvements</h2>
+<h3 id="beginner-friendliness">Beginner-friendliness</h3>
+<ul>
+<li>Learning curve</li>
+<li>Documentation</li>
+<li>Diagnostics</li>
+<li>Tooling</li>
+<li>Mirrors</li>
+</ul>
+<h3 id="enterprise-grade-applications">Enterprise-grade applications</h3>
+<ul>
+<li>Eco-system</li>
+<li>Professionalism</li>
+</ul>
+<h3 id="versatility">Versatility</h3>
+<ul>
+<li>painless dev shell</li>
+<li>incremental build</li>
+<li>rootlessness</li>
+</ul>
+<h2 id="all-your-base-are-belong-to-us">All your base are belong to us</h2>
+<h3 id="devos"><a href="https://github.com/divnix/devos">devos</a></h3>
+<h3 id="kubernix"><a href="https://github.com/saschagrunert/kubernix">kubernix</a></h3>
+<h3 id="nixops-deploy-rs"><a href="https://github.com/NixOS/nixops">nixops</a>, <a href="https://github.com/serokell/deploy-rs">deploy-rs</a></h3>
+<ol>
+<li><p>Build test in a isolated environment</p></li>
+<li><p>Deploy software to a new environment</p></li>
+</ol>
+<h3 id="hercules-ci"><a href="https://github.com/hercules-ci">Hercules CI</a></h3>
+<h3 id="trustix"><a href="https://github.com/tweag/trustix">trustix</a></h3>
+<h3 id="flox"><a href="https://discourse.nixos.org/t/introducing-flox-nix-for-simplicity-and-scale/11275">Flox</a></h3>
+
+
+    </section>
+  </article>
+  
+</body>
+</html>
