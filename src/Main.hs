@@ -211,7 +211,7 @@ readBoolOption :: String -> Bool
 readBoolOption x = elem (map toLower x) ["on", "yes", "true", "1"]
 
 enableTOC :: Bool
-enableTOC = False
+enableTOC = True
 
 enableNumberSections :: Bool
 enableNumberSections = False
