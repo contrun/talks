@@ -16,7 +16,6 @@
 + 我们创造了 communicating sequential processes。
 
 
-** Digression
 [[../pictures/meta-programming-hard.jpg]]
 
 
@@ -65,7 +64,6 @@ def transfer(sender: Account, receiver: Account, much: Int) {
 + 解决方案，请几个小心一点的程序员， ~AtomicStampedReference~
 + Lousy abstraction，poor modularity
 
-** Digression
 [[../pictures/10th-year-of-using-mutexes.png]]
 
 ** navie 想法
@@ -91,7 +89,6 @@ while(!commitTransaction()) {
 }
 #+end_src
 
-** Digression
 [[../pictures/sudo.jpg]]
 
 + 软件事物内存可以带来数据库事物 acid 保证中的 aci
@@ -139,7 +136,6 @@ while(!commit(vaules)) {
 + commit 要 linearizable，不能留下任何 inconsistent 的状态
 + 不是所有改动都能 rollback
 
-** Digression
 [[../pictures/rollback-to-2019.jpg]]
 
 * ZIO/STM 介绍
@@ -162,7 +158,6 @@ val zio2 = zio.provideSomeLayer[Random](clockLayer)
 
 ** a match in the heaven.
 [[../pictures/print-is-no-more.jpg]]
-** Digression
 
 + 纯函数式编程可以将纯函数和有副作用的 actions, effects 隔离开来
 + 纯函数的世界里没有冠状病毒，没有死亡，可以任意回滚
@@ -221,7 +216,6 @@ def transfer(sender: TRef[Int], receiver: TRef[Int], much: Int): UIO[Unit] =
 
 ** Dining philosophers
 
-** Digression
 [[../pictures/dining-philosophers-problem.jpg]]
 
 + 要让每一个哲学家吃上意大利面，即使他是苏格拉底，fuck historians
@@ -244,7 +238,6 @@ def transfer(sender: TRef[Int], receiver: TRef[Int], much: Int): UIO[Unit] =
 #+end_src
 
 + 你应该对这样的东西感到极端 skeptical
-** Digression
 [[../pictures/the-code-works.png]]
 
 + 因为这种写法看起来已经打环
@@ -260,7 +253,6 @@ def transfer(sender: TRef[Int], receiver: TRef[Int], much: Int): UIO[Unit] =
 
 * 一些实现细节
 + 我们这个啊，是 high level review
-** Digression
 [[../pictures/high-level.png]]
 
 ** STM vs IO
