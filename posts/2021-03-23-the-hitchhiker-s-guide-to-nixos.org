@@ -100,9 +100,9 @@ cf [[https://www.tweag.io/blog/2020-07-31-nixos-flakes/][Nix Flakes, Part 3: Man
   unpackPhase
 #+end_src
 *** Conclusion
-- Wait, it's just a derivation
+- Wait, it's just a [[https://nixos.org/guides/nix-pills/fundamentals-of-stdenv.html][derivation]]
   [[../pictures/its-all-derivation.png]]
-- stdenv to bootstrap toolchain
+- [[https://nixos.org/guides/nix-pills/fundamentals-of-stdenv.html][stdenv]] to bootstrap toolchain
 - [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][setup.sh]] as a generic build process
 - [[https://github.com/NixOS/nixpkgs/tree/master/pkgs/build-support/setup-hooks][setup-hooks]] to inject processing logic
 ** Key components
@@ -124,12 +124,12 @@ fixed point calculation, string manipulation
 
 * The Perks of Being a Stoic
 ** Me compiling, +github+ microsoft crying
-Don't cray for me, github and cachix. cf [[https://github.com/contrun/dotfiles]]
 *** Compiling
 [[../pictures/compiling.png]]
+Don't cry for me, github and cachix. cf [[https://github.com/contrun/dotfiles/blob/ed9d6022cc80f90a56421a1d51099c3355a75122/.github/workflows/nix.yml][nix build github actions]]
+[[../pictures/screenshot-2021-03-24-00-19-19.png]]
 *** Github actions to build my packages
 *** Cachix to cache my build results
-[[../pictures/screenshot-2021-03-24-00-19-19.png]]
 ** nixos test
 *** Integration tests
 You are a distributed system hacker. You have cassandra, pomerium, a blockchain. You don't emulate distributed system with seperated processes.
@@ -205,9 +205,8 @@ See ~nixos-container create flake-test --flake .~
 ** All your base are belong to us
 *** [[https://github.com/divnix/devos][devos]]
 *** [[https://github.com/saschagrunert/kubernix][kubernix]]
-*** [[https://github.com/NixOS/nixops][nixops]], [[https://github.com/serokell/deploy-rs][deploy-rs]]
-**** Build test in a isolated environment
-**** Deploy software to a new environment
+*** [[https://github.com/NixOS/nixops][nixops]]
+*** [[https://github.com/serokell/deploy-rs][deploy-rs]]
 *** [[https://github.com/hercules-ci][Hercules CI]]
 *** [[https://github.com/tweag/trustix][trustix]]
 *** [[https://discourse.nixos.org/t/introducing-flox-nix-for-simplicity-and-scale/11275][Flox]]
