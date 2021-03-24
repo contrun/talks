@@ -23,7 +23,7 @@ or maybe just
   cd dotfiles
   nixos-rebuild build --flake .#x86_64-linux
 #+end_src
-*** Show it in action
+*** Demo time
 #+begin_src shell
   nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel
   nix build .#nixosConfigurations.x86_64-linux.config.system.build.vm
@@ -32,21 +32,20 @@ or maybe just
   ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 e@localhost
 #+end_src
 Show off my PATH, systemctl status, i3wm, xmonad.
-*** Three pillar of nix super power
+*** Three pillars of nix super power
 I've just demonstrated packer + vagrant. Nix is far more powerful.
 **** Reproducible
-Like it solely from a git repo, with all desired packages, configurations.
+Build it solely from a git repo, with all the desired packages, configurations.
 **** Declarative
 A minimalist language to do all those things, without diving into all the details.
 **** Reliable
 Easily roll back to the previous state.
 
-* Devil in the White City
+* Devil in the Nix City
 ** Let's see who you really are
 [[../pictures/who-this-nix-guy-really-is.jpg]]
 #+begin_src shell
-  nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel
-  nix show-derivation
+  nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel --json | jq
   nix show-derivation $(nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel --json | jq -r '.[0].drvPath') | jq -r '.. | .buildCommand? | select(.)'
 #+end_src
 ** Anatomy of a flake file
@@ -93,7 +92,7 @@ Easily roll back to the previous state.
 cf [[https://www.tweag.io/blog/2020-07-31-nixos-flakes/][Nix Flakes, Part 3: Managing NixOS systems]]
 
 ** Anatomy of a nix derivation
-*** See it in action
+*** Demo time
 #+begin_src shell
   cat ~/Workspace/nixpkgs/pkgs/applications/misc/hello/default.nix
   nix-shell '<nixpkgs>' -A hello
@@ -101,11 +100,11 @@ cf [[https://www.tweag.io/blog/2020-07-31-nixos-flakes/][Nix Flakes, Part 3: Man
   unpackPhase
 #+end_src
 *** Conclusion
-- Wait, its always derivations
+- Wait, it's just a derivation
   [[../pictures/its-all-derivation.png]]
 - stdenv to bootstrap toolchain
-- setup.sh as a generic build process
-- setup-hooks to inject processing logic
+- [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh][setup.sh]] as a generic build process
+- [[https://github.com/NixOS/nixpkgs/tree/master/pkgs/build-support/setup-hooks][setup-hooks]] to inject processing logic
 ** Key components
 *** Nix, the language
 - Purely functional
@@ -133,8 +132,8 @@ Don't cray for me, github and cachix. cf [[https://github.com/contrun/dotfiles]]
 [[../pictures/screenshot-2021-03-24-00-19-19.png]]
 ** nixos test
 *** Integration tests
-You have cassandra, pomerium, a blockchain. You are a distributed system hacker. You don't emulate distributed system with seperated processes.
-*** See it in action
+You are a distributed system hacker. You have cassandra, pomerium, a blockchain. You don't emulate distributed system with seperated processes.
+*** Demo time
 #+begin_src shell
   nix-build ./nixos/tests/pomerium.nix
   nix-instantiate --strict --eval -E 'with import ./nixos/tests/pomerium.nix {}; driver.outPath'
@@ -149,35 +148,42 @@ You have cassandra, pomerium, a blockchain. You are a distributed system hacker.
 #+end_src
 ** Complex build environment
 *** Cross compilation
-You need to cross compile a package. I can haz a good cross compilation tool-chain without scratch my heads?
+You need to cross compile a package. I can haz a good cross compilation toolchain without scratch my heads?
 *** Static linking
 You need to statically link programs, your program depends on some c library which your package manager does not pack static libraries, e.g. openssl, rocksdb, or the library is not static-linking friendly, e.g. glibc.
-*** See it in action
+*** Demo time
 #+begin_src shell
-  go build -gcflags 'all=-N -l -m' -ldflags '-extldflags "-static"' ./cmd/ipvpnd/
+  go build ./cmd/ipvpnd/
   ldd ipvpnd
+  go build -ldflags '-extldflags "-static"' ./cmd/ipvpnd/
   nix-shell -E 'with import <nixpkgs> {}; pkgsCross.musl64.clangStdenv.mkDerivation { name = "clang-nix-shell"; }'
-  go build -gcflags 'all=-N -l -m' -ldflags '-extldflags "-static"' ./cmd/ipvpnd/
+  go build -ldflags '-extldflags "-static"' ./cmd/ipvpnd/
   nix-build -E 'with import <nixpkgs> {}; pkgsCross.aarch64-multiplatform-musl.hello'
   file ./result/bin/hello
   qemu-aarch64 ./result/bin/hello
-  ./result/bin/hello # courtesy for binfmt.emulatedSystems = [ "aarch64-linux" ];
+  ./result/bin/hello # courtesy of binfmt.emulatedSystems = [ "aarch64-linux" ];
 #+end_src
 ** Build farms
-See the above ~nix-build -E 'with import <nixpkgs> {}; pkgsCross.aarch64-multiplatform-musl.hello'~.
+Outsource cpu-intensive tasks to faster machines. See the above ~nix-build -E 'with import <nixpkgs> {}; pkgsCross.aarch64-multiplatform-musl.hello'~.
 ** dev shells, direnv for projects
 - Foreign libraries, openssl, rocksdb etc.
 - Some projects even customize toolchains, scylla db
-- Some projects are just monsters. Android. Chrome.
-- Integrations, kernel, databases, caches (just use docker compose?), what about kernel integration?
-- compile_commands.json
-  PATH="$HOME/.cache/bin:$PATH" dontUnpack=y dontInstall=y dontFixup=y src=. genericBuild
+- Some projects are just monsters. Android (see [[https://github.com/danielfullmer/robotnix][robotnix]]). Chrome.
+- Integrate databases, caches (just use docker compose?), what about kernel integration?
+- ~compile_commands.json~ ~PATH="$HOME/.cache/bin:$PATH" dontUnpack=y dontInstall=y dontFixup=y src=. genericBuild~
 - Case study: [[https://docs.haskellstack.org/en/stable/nix_integration/][stack]]
 - Case study: [[https://github.com/direnv/direnv][direnv]]
-- See it in action: [[https://github.com/NixOS/nix/][nix]]
+- Demo time: [[https://github.com/NixOS/nix/][nix]]
 ** Atomic updates, Easy rollback
-** nixops
+#+begin_src shell
+  realpath /nix/var/nix/profiles/system
+  realpath /run/current-system/
+  nixos-rebuild switch --rollback xxx
+  ls /run/secrets*
+#+end_src
 ** containers
+See ~nixos-container create flake-test --flake .~
+** nixops
 
 
 * Exciting Times
