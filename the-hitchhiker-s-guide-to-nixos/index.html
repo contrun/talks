@@ -103,7 +103,8 @@
 <ul>
 <li><a href="#devos"><span>devos</span></a></li>
 <li><a href="#kubernix"><span>kubernix</span></a></li>
-<li><a href="#nixops-deploy-rs"><span>nixops</span>, <span>deploy-rs</span></a></li>
+<li><a href="#nixops-1"><span>nixops</span></a></li>
+<li><a href="#deploy-rs"><span>deploy-rs</span></a></li>
 <li><a href="#hercules-ci"><span>Hercules CI</span></a></li>
 <li><a href="#trustix"><span>trustix</span></a></li>
 <li><a href="#flox"><span>Flox</span></a></li>
@@ -198,8 +199,8 @@ unpackPhase
 </code></pre>
 <h3 id="conclusion">Conclusion</h3>
 <ul>
-<li>Wait, it’s just a derivation <img src="../pictures/its-all-derivation.png" /></li>
-<li>stdenv to bootstrap toolchain</li>
+<li>Wait, it’s just a <a href="https://nixos.org/guides/nix-pills/fundamentals-of-stdenv.html">derivation</a> <img src="../pictures/its-all-derivation.png" /></li>
+<li><a href="https://nixos.org/guides/nix-pills/fundamentals-of-stdenv.html">stdenv</a> to bootstrap toolchain</li>
 <li><a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh">setup.sh</a> as a generic build process</li>
 <li><a href="https://github.com/NixOS/nixpkgs/tree/master/pkgs/build-support/setup-hooks">setup-hooks</a> to inject processing logic</li>
 </ul>
@@ -225,12 +226,10 @@ unpackPhase
 </ol>
 <h1 id="the-perks-of-being-a-stoic">The Perks of Being a Stoic</h1>
 <h2 id="me-compiling-github-microsoft-crying">Me compiling, <del>github</del> microsoft crying</h2>
-<p>Don’t cray for me, github and cachix. cf <a href="https://github.com/contrun/dotfiles">https://github.com/contrun/dotfiles</a></p>
 <h3 id="compiling">Compiling</h3>
-<p><img src="../pictures/compiling.png" /></p>
+<p><img src="../pictures/compiling.png" /> Don’t cry for me, github and cachix. cf <a href="https://github.com/contrun/dotfiles/blob/ed9d6022cc80f90a56421a1d51099c3355a75122/.github/workflows/nix.yml">nix build github actions</a> <img src="../pictures/screenshot-2021-03-24-00-19-19.png" /></p>
 <h3 id="github-actions-to-build-my-packages">Github actions to build my packages</h3>
 <h3 id="cachix-to-cache-my-build-results">Cachix to cache my build results</h3>
-<p><img src="../pictures/screenshot-2021-03-24-00-19-19.png" /></p>
 <h2 id="nixos-test">nixos test</h2>
 <h3 id="integration-tests">Integration tests</h3>
 <p>You are a distributed system hacker. You have cassandra, pomerium, a blockchain. You don’t emulate distributed system with seperated processes.</p>
@@ -308,11 +307,8 @@ ls /run/secrets*
 <h2 id="all-your-base-are-belong-to-us">All your base are belong to us</h2>
 <h3 id="devos"><a href="https://github.com/divnix/devos">devos</a></h3>
 <h3 id="kubernix"><a href="https://github.com/saschagrunert/kubernix">kubernix</a></h3>
-<h3 id="nixops-deploy-rs"><a href="https://github.com/NixOS/nixops">nixops</a>, <a href="https://github.com/serokell/deploy-rs">deploy-rs</a></h3>
-<ol>
-<li><p>Build test in a isolated environment</p></li>
-<li><p>Deploy software to a new environment</p></li>
-</ol>
+<h3 id="nixops-1"><a href="https://github.com/NixOS/nixops">nixops</a></h3>
+<h3 id="deploy-rs"><a href="https://github.com/serokell/deploy-rs">deploy-rs</a></h3>
 <h3 id="hercules-ci"><a href="https://github.com/hercules-ci">Hercules CI</a></h3>
 <h3 id="trustix"><a href="https://github.com/tweag/trustix">trustix</a></h3>
 <h3 id="flox"><a href="https://discourse.nixos.org/t/introducing-flox-nix-for-simplicity-and-scale/11275">Flox</a></h3>
