@@ -42,7 +42,12 @@
 <ul>
 <li><a href="#entering-nix-flake">Entering nix flake</a></li>
 <li><a href="#demo-time">Demo time</a></li>
-<li><a href="#three-pillars-of-nix-super-power">Three pillars of nix super power</a></li>
+</ul></li>
+<li><a href="#three-pillars-of-nix-super-power">Three pillars of nix super power</a>
+<ul>
+<li><a href="#reproducible">Reproducible</a></li>
+<li><a href="#declarative">Declarative</a></li>
+<li><a href="#reliable">Reliable</a></li>
 </ul></li>
 </ul></li>
 <li><a href="#devil-in-the-nix-city">Devil in the Nix City</a>
@@ -86,7 +91,7 @@
 <li><a href="#containers">containers</a></li>
 <li><a href="#nixops">nixops</a></li>
 </ul></li>
-<li><a href="#exciting-times">Exciting Times</a>
+<li><a href="#great-expectations">Great Expectations</a>
 <ul>
 <li><a href="#nice-to-have-improvements">Nice-to-have improvements</a>
 <ul>
@@ -131,16 +136,14 @@ QEMU_NET_OPTS=&quot;hostfwd=tcp::2222-:22&quot; ./result/bin/run-*-vm
 ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 e@localhost
 </code></pre>
 <p>Show off my PATH, systemctl status, i3wm, xmonad.</p>
-<h3 id="three-pillars-of-nix-super-power">Three pillars of nix super power</h3>
+<h2 id="three-pillars-of-nix-super-power">Three pillars of nix super power</h2>
 <p>I’ve just demonstrated packer + vagrant. Nix is far more powerful.</p>
-<ol>
-<li><p>Reproducible</p>
-<p>Build it solely from a git repo, with all the desired packages, configurations.</p></li>
-<li><p>Declarative</p>
-<p>A minimalist language to do all those things, without diving into all the details.</p></li>
-<li><p>Reliable</p>
-<p>Easily roll back to the previous state.</p></li>
-</ol>
+<h3 id="reproducible">Reproducible</h3>
+<p>Build it solely from a git repo, with all the desired packages, configurations.</p>
+<h3 id="declarative">Declarative</h3>
+<p>A minimalist language to do all those things, without diving into all the details.</p>
+<h3 id="reliable">Reliable</h3>
+<p>Easily roll back to the previous state.</p>
 <h1 id="devil-in-the-nix-city">Devil in the Nix City</h1>
 <h2 id="lets-see-who-you-really-are">Let’s see who you really are</h2>
 <p><img src="../pictures/who-this-nix-guy-really-is.jpg" /></p>
@@ -280,7 +283,7 @@ ls /run/secrets*
 <h2 id="containers">containers</h2>
 <p>See <code>nixos-container create flake-test --flake .</code></p>
 <h2 id="nixops">nixops</h2>
-<h1 id="exciting-times">Exciting Times</h1>
+<h1 id="great-expectations">Great Expectations</h1>
 <p><img src="../pictures/all-my-base-are-belong-to-you.png" /></p>
 <h2 id="nice-to-have-improvements">Nice-to-have improvements</h2>
 <h3 id="beginner-friendliness">Beginner-friendliness</h3>
