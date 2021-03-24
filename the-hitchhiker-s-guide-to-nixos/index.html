@@ -41,17 +41,17 @@
 <li><a href="#how-you-build-your-os">How you build your OS?</a>
 <ul>
 <li><a href="#entering-nix-flake">Entering nix flake</a></li>
-<li><a href="#show-it-in-action">Show it in action</a></li>
-<li><a href="#three-pillar-of-nix-super-power">Three pillar of nix super power</a></li>
+<li><a href="#demo-time">Demo time</a></li>
+<li><a href="#three-pillars-of-nix-super-power">Three pillars of nix super power</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#devil-in-the-white-city">Devil in the White City</a>
+<li><a href="#devil-in-the-nix-city">Devil in the Nix City</a>
 <ul>
 <li><a href="#lets-see-who-you-really-are">Let’s see who you really are</a></li>
 <li><a href="#anatomy-of-a-flake-file">Anatomy of a flake file</a></li>
 <li><a href="#anatomy-of-a-nix-derivation">Anatomy of a nix derivation</a>
 <ul>
-<li><a href="#see-it-in-action">See it in action</a></li>
+<li><a href="#demo-time-1">Demo time</a></li>
 <li><a href="#conclusion">Conclusion</a></li>
 </ul></li>
 <li><a href="#key-components">Key components</a>
@@ -72,19 +72,19 @@
 <li><a href="#nixos-test">nixos test</a>
 <ul>
 <li><a href="#integration-tests">Integration tests</a></li>
-<li><a href="#see-it-in-action-1">See it in action</a></li>
+<li><a href="#demo-time-2">Demo time</a></li>
 </ul></li>
 <li><a href="#complex-build-environment">Complex build environment</a>
 <ul>
 <li><a href="#cross-compilation">Cross compilation</a></li>
 <li><a href="#static-linking">Static linking</a></li>
-<li><a href="#see-it-in-action-2">See it in action</a></li>
+<li><a href="#demo-time-3">Demo time</a></li>
 </ul></li>
 <li><a href="#build-farms">Build farms</a></li>
 <li><a href="#dev-shells-direnv-for-projects">dev shells, direnv for projects</a></li>
 <li><a href="#atomic-updates-easy-rollback">Atomic updates, Easy rollback</a></li>
-<li><a href="#nixops">nixops</a></li>
 <li><a href="#containers">containers</a></li>
+<li><a href="#nixops">nixops</a></li>
 </ul></li>
 <li><a href="#exciting-times">Exciting Times</a>
 <ul>
@@ -123,7 +123,7 @@
 cd dotfiles
 nixos-rebuild build --flake .#x86_64-linux
 </code></pre>
-<h3 id="show-it-in-action">Show it in action</h3>
+<h3 id="demo-time">Demo time</h3>
 <pre class="shell"><code>nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel
 nix build .#nixosConfigurations.x86_64-linux.config.system.build.vm
 nix path-info .#nixosConfigurations.x86_64-linux.config.system.build.toplevel -sSh
@@ -131,21 +131,20 @@ QEMU_NET_OPTS=&quot;hostfwd=tcp::2222-:22&quot; ./result/bin/run-*-vm
 ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 e@localhost
 </code></pre>
 <p>Show off my PATH, systemctl status, i3wm, xmonad.</p>
-<h3 id="three-pillar-of-nix-super-power">Three pillar of nix super power</h3>
+<h3 id="three-pillars-of-nix-super-power">Three pillars of nix super power</h3>
 <p>I’ve just demonstrated packer + vagrant. Nix is far more powerful.</p>
 <ol>
 <li><p>Reproducible</p>
-<p>Like it solely from a git repo, with all desired packages, configurations.</p></li>
+<p>Build it solely from a git repo, with all the desired packages, configurations.</p></li>
 <li><p>Declarative</p>
 <p>A minimalist language to do all those things, without diving into all the details.</p></li>
 <li><p>Reliable</p>
 <p>Easily roll back to the previous state.</p></li>
 </ol>
-<h1 id="devil-in-the-white-city">Devil in the White City</h1>
+<h1 id="devil-in-the-nix-city">Devil in the Nix City</h1>
 <h2 id="lets-see-who-you-really-are">Let’s see who you really are</h2>
 <p><img src="../pictures/who-this-nix-guy-really-is.jpg" /></p>
-<pre class="shell"><code>nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel
-nix show-derivation
+<pre class="shell"><code>nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel --json | jq
 nix show-derivation $(nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel --json | jq -r '.[0].drvPath') | jq -r '.. | .buildCommand? | select(.)'
 </code></pre>
 <h2 id="anatomy-of-a-flake-file">Anatomy of a flake file</h2>
@@ -188,7 +187,7 @@ curl http://flake-test/
 </code></pre>
 <p>cf <a href="https://www.tweag.io/blog/2020-07-31-nixos-flakes/">Nix Flakes, Part 3: Managing NixOS systems</a></p>
 <h2 id="anatomy-of-a-nix-derivation">Anatomy of a nix derivation</h2>
-<h3 id="see-it-in-action">See it in action</h3>
+<h3 id="demo-time-1">Demo time</h3>
 <pre class="shell"><code>cat ~/Workspace/nixpkgs/pkgs/applications/misc/hello/default.nix
 nix-shell '&lt;nixpkgs&gt;' -A hello
 declare -f genericBuild
@@ -196,10 +195,10 @@ unpackPhase
 </code></pre>
 <h3 id="conclusion">Conclusion</h3>
 <ul>
-<li>Wait, its always derivations <img src="../pictures/its-all-derivation.png" /></li>
+<li>Wait, it’s just a derivation <img src="../pictures/its-all-derivation.png" /></li>
 <li>stdenv to bootstrap toolchain</li>
-<li>setup.sh as a generic build process</li>
-<li>setup-hooks to inject processing logic</li>
+<li><a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/stdenv/generic/setup.sh">setup.sh</a> as a generic build process</li>
+<li><a href="https://github.com/NixOS/nixpkgs/tree/master/pkgs/build-support/setup-hooks">setup-hooks</a> to inject processing logic</li>
 </ul>
 <h2 id="key-components">Key components</h2>
 <h3 id="nix-the-language">Nix, the language</h3>
@@ -231,8 +230,8 @@ unpackPhase
 <p><img src="../pictures/screenshot-2021-03-24-00-19-19.png" /></p>
 <h2 id="nixos-test">nixos test</h2>
 <h3 id="integration-tests">Integration tests</h3>
-<p>You have cassandra, pomerium, a blockchain. You are a distributed system hacker. You don’t emulate distributed system with seperated processes.</p>
-<h3 id="see-it-in-action-1">See it in action</h3>
+<p>You are a distributed system hacker. You have cassandra, pomerium, a blockchain. You don’t emulate distributed system with seperated processes.</p>
+<h3 id="demo-time-2">Demo time</h3>
 <pre class="shell"><code>nix-build ./nixos/tests/pomerium.nix
 nix-instantiate --strict --eval -E 'with import ./nixos/tests/pomerium.nix {}; driver.outPath'
 $(nix-instantiate --strict --eval -E 'with import ./nixos/tests/pomerium.nix {}; driver.outPath' | xargs)/bin/nixos-test-driver
@@ -245,35 +244,42 @@ pomerium.succeed(&quot;curl --resolve my.website:80:127.0.0.1 http://my.website 
 </code></pre>
 <h2 id="complex-build-environment">Complex build environment</h2>
 <h3 id="cross-compilation">Cross compilation</h3>
-<p>You need to cross compile a package. I can haz a good cross compilation tool-chain without scratch my heads?</p>
+<p>You need to cross compile a package. I can haz a good cross compilation toolchain without scratch my heads?</p>
 <h3 id="static-linking">Static linking</h3>
 <p>You need to statically link programs, your program depends on some c library which your package manager does not pack static libraries, e.g. openssl, rocksdb, or the library is not static-linking friendly, e.g. glibc.</p>
-<h3 id="see-it-in-action-2">See it in action</h3>
-<pre class="shell"><code>go build -gcflags 'all=-N -l -m' -ldflags '-extldflags &quot;-static&quot;' ./cmd/ipvpnd/
+<h3 id="demo-time-3">Demo time</h3>
+<pre class="shell"><code>go build ./cmd/ipvpnd/
 ldd ipvpnd
+go build -ldflags '-extldflags &quot;-static&quot;' ./cmd/ipvpnd/
 nix-shell -E 'with import &lt;nixpkgs&gt; {}; pkgsCross.musl64.clangStdenv.mkDerivation { name = &quot;clang-nix-shell&quot;; }'
-go build -gcflags 'all=-N -l -m' -ldflags '-extldflags &quot;-static&quot;' ./cmd/ipvpnd/
+go build -ldflags '-extldflags &quot;-static&quot;' ./cmd/ipvpnd/
 nix-build -E 'with import &lt;nixpkgs&gt; {}; pkgsCross.aarch64-multiplatform-musl.hello'
 file ./result/bin/hello
 qemu-aarch64 ./result/bin/hello
-./result/bin/hello # courtesy for binfmt.emulatedSystems = [ &quot;aarch64-linux&quot; ];
+./result/bin/hello # courtesy of binfmt.emulatedSystems = [ &quot;aarch64-linux&quot; ];
 </code></pre>
 <h2 id="build-farms">Build farms</h2>
-<p>See the above <code>nix-build -E 'with import &lt;nixpkgs&gt; {}; pkgsCross.aarch64-multiplatform-musl.hello'</code>.</p>
+<p>Outsource cpu-intensive tasks to faster machines. See the above <code>nix-build -E 'with import &lt;nixpkgs&gt; {}; pkgsCross.aarch64-multiplatform-musl.hello'</code>.</p>
 <h2 id="dev-shells-direnv-for-projects">dev shells, direnv for projects</h2>
 <ul>
 <li>Foreign libraries, openssl, rocksdb etc.</li>
 <li>Some projects even customize toolchains, scylla db</li>
-<li>Some projects are just monsters. Android. Chrome.</li>
-<li>Integrations, kernel, databases, caches (just use docker compose?), what about kernel integration?</li>
+<li>Some projects are just monsters. Android (see <a href="https://github.com/danielfullmer/robotnix">robotnix</a>). Chrome.</li>
+<li>Integrate databases, caches (just use docker compose?), what about kernel integration?</li>
 <li>compile<sub>commands</sub>.json PATH=“$HOME/.cache/bin:$PATH” dontUnpack=y dontInstall=y dontFixup=y src=. genericBuild</li>
 <li>Case study: <a href="https://docs.haskellstack.org/en/stable/nix_integration/">stack</a></li>
 <li>Case study: <a href="https://github.com/direnv/direnv">direnv</a></li>
-<li>See it in action: <a href="https://github.com/NixOS/nix/">nix</a></li>
+<li>Demo time: <a href="https://github.com/NixOS/nix/">nix</a></li>
 </ul>
 <h2 id="atomic-updates-easy-rollback">Atomic updates, Easy rollback</h2>
-<h2 id="nixops">nixops</h2>
+<pre class="shell"><code>realpath /nix/var/nix/profiles/system
+realpath /run/current-system/
+nixos-rebuild switch --rollback xxx
+ls /run/secrets*
+</code></pre>
 <h2 id="containers">containers</h2>
+<p>See <code>nixos-container create flake-test --flake .</code></p>
+<h2 id="nixops">nixops</h2>
 <h1 id="exciting-times">Exciting Times</h1>
 <p><img src="../pictures/all-my-base-are-belong-to-you.png" /></p>
 <h2 id="nice-to-have-improvements">Nice-to-have improvements</h2>
