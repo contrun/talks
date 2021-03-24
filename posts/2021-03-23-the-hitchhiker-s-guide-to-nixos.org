@@ -32,13 +32,13 @@ or maybe just
   ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 e@localhost
 #+end_src
 Show off my PATH, systemctl status, i3wm, xmonad.
-*** Three pillars of nix super power
+** Three pillars of nix super power
 I've just demonstrated packer + vagrant. Nix is far more powerful.
-**** Reproducible
+*** Reproducible
 Build it solely from a git repo, with all the desired packages, configurations.
-**** Declarative
+*** Declarative
 A minimalist language to do all those things, without diving into all the details.
-**** Reliable
+*** Reliable
 Easily roll back to the previous state.
 
 * Devil in the Nix City
@@ -186,7 +186,7 @@ See ~nixos-container create flake-test --flake .~
 ** nixops
 
 
-* Exciting Times
+* Great Expectations
 [[../pictures/all-my-base-are-belong-to-you.png]]
 ** Nice-to-have improvements
 *** Beginner-friendliness
