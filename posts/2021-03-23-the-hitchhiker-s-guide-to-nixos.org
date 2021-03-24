@@ -21,13 +21,13 @@ or maybe just
 #+begin_src shell
   git clone https://github.com/contrun/dotfiles.git
   cd dotfiles
-  nixos-rebuild build --flake .#x86_64-linux
+  nixos-rebuild build --flake '.#x86_64-linux'
 #+end_src
 *** Demo time
 #+begin_src shell
-  nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel
-  nix build .#nixosConfigurations.x86_64-linux.config.system.build.vm
-  nix path-info .#nixosConfigurations.x86_64-linux.config.system.build.toplevel -sSh
+  nix build '.#nixosConfigurations.x86_64-linux.config.system.build.toplevel'
+  nix build '.#nixosConfigurations.x86_64-linux.config.system.build.vm'
+  nix path-info '.#nixosConfigurations.x86_64-linux.config.system.build.toplevel' -sSh
   QEMU_NET_OPTS="hostfwd=tcp::2222-:22" ./result/bin/run-*-vm
   ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 e@localhost
 #+end_src
@@ -45,8 +45,8 @@ Easily roll back to the previous state.
 ** Let's see who you really are
 [[../pictures/who-this-nix-guy-really-is.jpg]]
 #+begin_src shell
-  nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel --json | jq
-  nix show-derivation $(nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel --json | jq -r '.[0].drvPath') | jq -r '.. | .buildCommand? | select(.)'
+  nix build '.#nixosConfigurations.x86_64-linux.config.system.build.toplevel' --json | jq
+  nix show-derivation $(nix build '.#nixosConfigurations.x86_64-linux.config.system.build.toplevel' --json | jq -r '.[0].drvPath') | jq -r '.. | .buildCommand? | select(.)'
 #+end_src
 ** Anatomy of a flake file
 #+begin_src nix
