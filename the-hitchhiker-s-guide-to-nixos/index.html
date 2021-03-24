@@ -121,12 +121,12 @@
 <h3 id="entering-nix-flake">Entering nix flake</h3>
 <pre class="shell"><code>git clone https://github.com/contrun/dotfiles.git
 cd dotfiles
-nixos-rebuild build --flake .#x86_64-linux
+nixos-rebuild build --flake '.#x86_64-linux'
 </code></pre>
 <h3 id="demo-time">Demo time</h3>
-<pre class="shell"><code>nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel
-nix build .#nixosConfigurations.x86_64-linux.config.system.build.vm
-nix path-info .#nixosConfigurations.x86_64-linux.config.system.build.toplevel -sSh
+<pre class="shell"><code>nix build '.#nixosConfigurations.x86_64-linux.config.system.build.toplevel'
+nix build '.#nixosConfigurations.x86_64-linux.config.system.build.vm'
+nix path-info '.#nixosConfigurations.x86_64-linux.config.system.build.toplevel' -sSh
 QEMU_NET_OPTS=&quot;hostfwd=tcp::2222-:22&quot; ./result/bin/run-*-vm
 ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 2222 e@localhost
 </code></pre>
@@ -144,8 +144,8 @@ ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o StrictH
 <h1 id="devil-in-the-nix-city">Devil in the Nix City</h1>
 <h2 id="lets-see-who-you-really-are">Let’s see who you really are</h2>
 <p><img src="../pictures/who-this-nix-guy-really-is.jpg" /></p>
-<pre class="shell"><code>nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel --json | jq
-nix show-derivation $(nix build .#nixosConfigurations.x86_64-linux.config.system.build.toplevel --json | jq -r '.[0].drvPath') | jq -r '.. | .buildCommand? | select(.)'
+<pre class="shell"><code>nix build '.#nixosConfigurations.x86_64-linux.config.system.build.toplevel' --json | jq
+nix show-derivation $(nix build '.#nixosConfigurations.x86_64-linux.config.system.build.toplevel' --json | jq -r '.[0].drvPath') | jq -r '.. | .buildCommand? | select(.)'
 </code></pre>
 <h2 id="anatomy-of-a-flake-file">Anatomy of a flake file</h2>
 <div class="sourceCode" id="cb6"><pre class="sourceCode nix"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">{</span></span>
