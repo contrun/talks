@@ -13,6 +13,24 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Generate dotenv file
+      run: |
+        tee -a .env.secrets <<< "$DOTENV"
+        if [[ -f .env.gpg ]]; then gpg --batch --yes --passphrase-fd 0 --output .env.decrypted --decrypt .env.gpg <<< "${{ secrets.GPG_PASSWORD }}"; fi
+        grep -hs ^ .env.default .env.local .env .env.decrypted .env.secrets | tee .env.final
+        echo "" >> .env.final
+        owner="${{ github.repository_owner }}"
+        repo="$(awk -F / '{print $2}' <<< "${{ github.repository }}")"
+        if ! grep -qE '^BASEURL=' .env.final; then echo "BASEURL=${BASEURL:-https://$owner.github.io/$repo/}" | tee -a .env.final; fi
+        if ! grep -qE '^DOMAIN=' .env.final; then echo "DOMAIN=$(awk -F / '/^BASEURL=/ {print $3}' .env.final | tail -n1)" | tee -a .env.final; fi
+      env:
+        DOTENV: ${{ secrets.DOTENV }}
+        BASEURL: ${{ secrets.BASEURL }}
+
+    - uses: c-py/action-dotenv-to-setenv@v2
+      with:
+        env-file: .env.final
+
     - uses: actions/cache@v1
       name: Cache ~/.npm
       with:
@@ -64,4 +82,5 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./public
+        cname: '${{ env.DOMAIN }}'
         publish_branch: gh-pages

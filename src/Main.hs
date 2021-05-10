@@ -3,9 +3,9 @@
 --------------------------------------------------------------------------------
 
 import Control.Applicative ((<|>))
-import Data.Char (isAlphaNum)
 import Data.Char
-  ( toLower,
+  ( isAlphaNum,
+    toLower,
   )
 import Data.Functor.Identity (runIdentity)
 import Data.List
@@ -22,14 +22,14 @@ import qualified Data.Text as T
 import Hakyll
 import qualified Hakyll.Core.Store as Store
 import System.FilePath.Posix
-  ( (</>),
-    joinPath,
+  ( joinPath,
     normalise,
     splitDirectories,
     splitPath,
     takeBaseName,
     takeDirectory,
     takeFileName,
+    (</>),
   )
 import Text.Pandoc.Definition
 import Text.Pandoc.Options
@@ -171,7 +171,7 @@ cleanIndex url
 --------------------------------------------------------------------------------
 myDefaultContext :: Context String
 myDefaultContext =
-  constField "siteTitle" "contrun's personal wiki"
+  constField "siteTitle" "talks"
     <> defaultContext
 
 postCtx :: Context String
@@ -287,10 +287,10 @@ getTitleFromMeta m =
 
 fileNameFromStrings :: [(Maybe String, String)] -> String
 fileNameFromStrings list =
-  toFileName
-    $ fromMaybe "no title"
-    $ (findAttribute "slug" list)
-      <|> (findAttribute "title" list)
+  toFileName $
+    fromMaybe "no title" $
+      (findAttribute "slug" list)
+        <|> (findAttribute "title" list)
 
 findAttribute :: String -> [(Maybe String, String)] -> Maybe String
 findAttribute a list = fmap snd $ find myFind list
