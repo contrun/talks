@@ -21,6 +21,7 @@ or maybe just
 #+begin_src shell
   git clone https://github.com/contrun/dotfiles.git
   cd dotfiles
+  git checkout c524c7316967049b444e84e6fba925426b94a112
   nixos-rebuild build --flake '.#x86_64-linux'
 #+end_src
 *** Demo time
