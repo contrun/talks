@@ -127,7 +127,9 @@ fixed point calculation, string manipulation
 ** Me compiling, +github+ microsoft crying
 *** Compiling
 [[../pictures/compiling.png]]
+
 Don't cry for me, github and cachix. cf [[https://github.com/contrun/dotfiles/blob/ed9d6022cc80f90a56421a1d51099c3355a75122/.github/workflows/nix.yml][nix build github actions]]
+
 [[../pictures/screenshot-2021-03-24-00-19-19.png]]
 *** Github actions to build my packages
 *** Cachix to cache my build results
