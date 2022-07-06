@@ -156,7 +156,7 @@ val zio2 = zio.provideSomeLayer[Random](clockLayer)
 + free at last，你会希望使用的都是 pure functions，没有任何 effects 的纯函数
 
 
-** a match in the heaven.
+** a match in the heaven
 [[../pictures/print-is-no-more.jpg]]
 
 + 纯函数式编程可以将纯函数和有副作用的 actions, effects 隔离开来

@@ -77,6 +77,8 @@ jobs:
     - name: Check the site output
       run: |
         cabal exec site -- check
+      # This is flaky, some links may be temporarily unreachable.
+      continue-on-error: true
 
     - uses: peaceiris/actions-gh-pages@v3
       with:
