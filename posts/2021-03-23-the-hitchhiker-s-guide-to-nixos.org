@@ -142,7 +142,7 @@ You are a distributed system hacker. You have cassandra, pomerium, a blockchain.
   nix-instantiate --strict --eval -E 'with import ./nixos/tests/pomerium.nix {}; driver.outPath'
   $(nix-instantiate --strict --eval -E 'with import ./nixos/tests/pomerium.nix {}; driver.outPath' | xargs)/bin/nixos-test-driver
 #+end_src
-#+begin_src pytho
+#+begin_src python
   backend.wait_for_unit("nginx")
   backend.wait_for_open_port(80)
   pomerium.wait_for_unit("pomerium")

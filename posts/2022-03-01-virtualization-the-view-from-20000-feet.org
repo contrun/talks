@@ -47,7 +47,7 @@ source: [[https://doi.org/10.2200/S00754ED1V01Y201701CAC038][Hardware and Softwa
 ** Write your own hypervisor
 source: [[https://lwn.net/Articles/658511/][Using the KVM API
 ​]]
-#+INCLUDE: ../assets/virtualization/kvm.c src c
+#+INCLUDE: ./assets/virtualization/kvm.c src c
 
 * Qemu
 [[../pictures/io-emulation-in-kvm-qemu.png]]
