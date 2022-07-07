@@ -241,12 +241,11 @@ unpackPhase
 nix-instantiate --strict --eval -E 'with import ./nixos/tests/pomerium.nix {}; driver.outPath'
 $(nix-instantiate --strict --eval -E 'with import ./nixos/tests/pomerium.nix {}; driver.outPath' | xargs)/bin/nixos-test-driver
 </code></pre>
-<pre class="pytho"><code>backend.wait_for_unit(&quot;nginx&quot;)
-backend.wait_for_open_port(80)
-pomerium.wait_for_unit(&quot;pomerium&quot;)
-pomerium.wait_for_open_port(80)
-pomerium.succeed(&quot;curl --resolve my.website:80:127.0.0.1 http://my.website | grep -q 'hello world'&quot;)
-</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1"></a>backend.wait_for_unit(<span class="st">&quot;nginx&quot;</span>)</span>
+<span id="cb10-2"><a href="#cb10-2"></a>backend.wait_for_open_port(<span class="dv">80</span>)</span>
+<span id="cb10-3"><a href="#cb10-3"></a>pomerium.wait_for_unit(<span class="st">&quot;pomerium&quot;</span>)</span>
+<span id="cb10-4"><a href="#cb10-4"></a>pomerium.wait_for_open_port(<span class="dv">80</span>)</span>
+<span id="cb10-5"><a href="#cb10-5"></a>pomerium.succeed(<span class="st">&quot;curl --resolve my.website:80:127.0.0.1 http://my.website | grep -q 'hello world'&quot;</span>)</span></code></pre></div>
 <h2 id="complex-build-environment">Complex build environment</h2>
 <h3 id="cross-compilation">Cross compilation</h3>
 <p>You need to cross compile a package. I can haz a good cross compilation toolchain without scratch my heads?</p>

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+<script defer type="text/javascript" src="../vendor/katex/katex.min.js"></script>
+<script defer type="text/javascript" src="../vendor/katex/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+  
+  <link rel="stylesheet" type="text/css" href="../css/syntax.css">
+  <link rel="stylesheet" type="text/css" href="../css/tufte.css">
+  <link rel="stylesheet" type="text/css" href="../css/custom.css">
+  
+  <title>nix for developers in a hurry - talks</title>
+  
+</head>
+<body>
+        <nav class="group">
+          <a href="../">home</a>
+          <a href="https://github.com/contrun/talks/">github</a>
+      </nav>
+
+  <article>
+    <section>
+      <div class="post_title">
+  <h2 class="post_title"><a href=".././nix-for-developers-in-a-hurry/">nix for developers in a hurry</a></h2>
+</div>
+
+<div class="info">
+    Posted on July  5, 2022
+    
+</div>
+
+
+<div class="toc"><div class="header">Table of Contents</div>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#how-we-build-and-deliver-software-today">How we build and deliver software today</a>
+<ul>
+<li><a href="#tell-people-to-apt-install-lib-dev">tell people to apt install lib*-dev</a></li>
+<li><a href="#cgo-is-not-go">cgo is not go</a></li>
+<li><a href="#ad-hoc-solutions">ad hoc solutions</a></li>
+<li><a href="#docker-for-the-win">docker for the win</a>
+<ul>
+<li><a href="#building-it-with-docker-almost-reproducibly">Building it with docker (almost reproducibly)</a></li>
+<li><a href="#what-if-i-want-to-clean-up-the-dirt">What if I want to clean up the dirt</a></li>
+<li><a href="#now-you-have-two-problems">Now you have two problems</a></li>
+</ul></li>
+<li><a href="#but-this-is-not-enough">But this is not enough</a>
+<ul>
+<li><a href="#exotic-toolchains-complex-build-time-dependencies-cross-compiling-static-linking">exotic toolchains, complex build time dependencies, cross compiling, static linking</a></li>
+<li><a href="#one-more-thing-how-do-you-deliver-your-software">One more thing, how do you deliver your software?</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#how-nix-can-improve-development-workflow">How nix can improve development workflow</a>
+<ul>
+<li><a href="#no-cheat-lets-start-a-new-ubuntu-vm">No cheat, let’s start a new ubuntu VM</a></li>
+<li><a href="#a-little-bit-magic">A little bit magic</a></li>
+<li><a href="#more-magic">More magic</a>
+<ul>
+<li><a href="#production-nix">production nix</a></li>
+<li><a href="#real-world-software-building">real world software building</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#anatomy-some-physiology-lesson">Anatomy (some physiology lesson)</a>
+<ul>
+<li><a href="#anatomy-of-a-nix-flake">Anatomy of a nix flake</a></li>
+<li><a href="#anatomy-of-a-nix-derivation">Anatomy of a nix derivation</a></li>
+<li><a href="#anatomy-of-a-typical-nix-package">Anatomy of a typical nix package</a>
+<ul>
+<li><a href="#demostration">Demostration</a></li>
+<li><a href="#peculiarities">Peculiarities</a></li>
+</ul></li>
+<li><a href="#anatomy-of-a-nix-building-process">Anatomy of a nix building process</a></li>
+</ul></li>
+<li><a href="#further-references">Further references</a>
+<ul>
+<li><a href="#how-nix-can-improve-software-delivery">How nix can improve software delivery</a>
+<ul>
+<li><a href="#nix-run">nix run</a></li>
+<li><a href="#docker">Docker</a></li>
+<li><a href="#nixops-nixos-containers">nixops, nixos containers</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+<h1 id="introduction">Introduction</h1>
+<p>软件开发者生命的很大一部分时间花费在熟悉外部工具来管理依赖（包含编译时依赖、运行时依赖）和分发软件上面。 有了容器之后，依赖管理、软件分发是否已经是已经完全解决的问题？不，很多情况下，使用 docker 来构建和分发软件都是一个次优方案。 本次演讲将会介绍一个新的、几乎全能的工具——nix。一些关于 nix 文章就会出现在 <a href="https://hn.algolia.com/?dateRange=all&amp;page=0&amp;prefix=true&amp;query=nix&amp;sort=byPopularity&amp;type=story">hacker news</a> 或者是 <a href="https://lobste.rs/search?q=nix&amp;what=stories&amp;order=points">Lobsters</a> 首页。 一方面，评论中总是有很多 nix zealots 说 ta 多么希望能够早点认识和使用 nix， 另一方面也不乏 nix cynics 抱怨为什么需要这样 overhype nix，他们声称现在的工具完全可以解决他们的问题。 本次演讲正是另外一个 nix zealot 为转变 nix cynics 看法所做的另外一个尝试。</p>
+<p>本次演讲首先将会回顾一些常见的软件开发、发布工作流中存在的不便之处（不识庐山真面目，只缘身在此山中）， 之后我会 demo 一些魔法，这些魔法将会清楚地显露出 nix 如何优雅地解决这些问题（并解救我们失落的灵魂）， 然后我会介绍稍微介绍一下魔法是如何变出来的以及这些魔法后面的原理（我们无法区分足够先进的技术和魔法）， 最后我会稍微提一下 nix 可以在其他的哪些地方提升你的生活品质（当你有了一把锤子，那么生活中的钉子还会少吗）。</p>
+<p>警告，本演讲可能会永远地改变你对软件编译和软件分发的看法。</p>
+<p>附：一点有助于直观上感受 nix 是一个什么东西的资料</p>
+<ul>
+<li><a href="https://nixos.org">Nix 官网上面的一些 demo（请点击右侧的 asciinema 以及下面的 examples）</a></li>
+<li><a href="https://xeiaso.net/blog/i-was-wrong-about-nix-2020-02-10">I was Wrong about Nix</a></li>
+</ul>
+<h1 id="how-we-build-and-deliver-software-today">How we build and deliver software today</h1>
+<p>To build a some non-trivial package, we need</p>
+<h2 id="tell-people-to-apt-install-lib-dev">tell people to apt install lib*-dev</h2>
+<p>A respectable project should give all the instructions for developers on all the platforms</p>
+<p><img src="../pictures/building-instructions.png" /></p>
+<h2 id="cgo-is-not-go">cgo is not go</h2>
+<p>Fuck it, I am done with this shit. I will just use go, a self-sufficient garden. Of course, cgo is not go. BTW, jni is not java (whose motto is “Compile once, run everywhere”). What about sqlite?</p>
+<h2 id="ad-hoc-solutions">ad hoc solutions</h2>
+<ul>
+<li>bazel build</li>
+<li>cros<sub>dev</sub> <a href="https://chromium.googlesource.com/chromiumos/chromite/+/refs/heads/main/scripts/cros_sdk.py">scripts/cros<sub>sdk</sub>.py - chromiumos/chromite - Git at Google</a></li>
+</ul>
+<h2 id="docker-for-the-win">docker for the win</h2>
+<p>Inspired by a true story</p>
+<h3 id="building-it-with-docker-almost-reproducibly">Building it with docker (almost reproducibly)</h3>
+<pre class="text"><code>╭─e@aol ~/Workspace/repo1 ‹master●›
+╰─$ make all-via-docker                                                                                                                                                                                           2 ↵
+docker run --rm -v `pwd`:/code example/riscv-gnu-toolchain@sha256:89168b4b109a0f741078a71b7c4dddaf1d283a5244608f7851f5714fbad273bb bash -c &quot;cd /code &amp;&amp; make&quot;
+cd deps/secp256k1 &amp;&amp; \
+        ./autogen.sh &amp;&amp; \
+        CC=riscv64-unknown-elf-gcc LD=riscv64-unknown-elf-gcc ./configure --with-bignum=no --enable-ecmult-static-precomputation --enable-endomorphism --enable-module-recovery --host=riscv64-unknown-elf &amp;&amp; \
+        make src/ecmult_static_pre_context.h src/ecmult_static_context.h
+libtoolize: putting auxiliary files in AC_CONFIG_AUX_DIR, 'build-aux'.
+libtoolize: copying file 'build-aux/ltmain.sh'
+libtoolize: putting macros in AC_CONFIG_MACRO_DIRS, 'build-aux/m4'.
+libtoolize: copying file 'build-aux/m4/libtool.m4'
+libtoolize: copying file 'build-aux/m4/ltoptions.m4'
+libtoolize: copying file 'build-aux/m4/ltsugar.m4'
+libtoolize: copying file 'build-aux/m4/ltversion.m4'
+libtoolize: copying file 'build-aux/m4/lt~obsolete.m4'
+</code></pre>
+<h3 id="what-if-i-want-to-clean-up-the-dirt">What if I want to clean up the dirt</h3>
+<pre class="text"><code>╭─e@aol ~/Workspace/repo1 ‹master●›
+╰─$ make clean
+rm -f *.o
+rm -f src/*.o
+rm -f src/*.lo
+rm -f src/asm/*.o
+rm -f src/asm/*.lo
+rm -f src/java/*.o
+rm -f src/java/*.lo
+rm: cannot remove 'build/secp256k1_data_info.h': Permission denied
+rm: cannot remove 'build/dump_secp256k1_data': Permission denied
+make: *** [Makefile:88: clean] Fehler 1
+</code></pre>
+<pre class="text"><code>╭─e@aol ~/Workspace/repo1 ‹master●›
+╰─$ sudo make clean                                                                                                                                                                                               2 ↵
+rm -f *.o
+rm -f src/*.o
+rm -f src/*.lo
+rm -f src/asm/*.o
+rm -f src/asm/*.lo
+rm -f src/java/*.o
+rm -f src/java/*.lo
+cargo clean
+error: no override and no default toolchain set
+make: *** [Makefile:92: clean] Fehler 1
+</code></pre>
+<h3 id="now-you-have-two-problems">Now you have two problems</h3>
+<pre class="text"><code>╭─e@aol ~/Workspace/repo2 ‹master●›
+╰─$ make all-via-docker                                                                                                                                                                                         130 ↵
+docker run --user 1000:100 --rm -v `pwd`:/code example/riscv-gnu-toolchain@sha256:bbe8a3f79705f67d505d1f1d5ddc694a4fd537ed1c7e9622420a470d59ba2ec3 bash -c &quot;cd /code &amp;&amp; make&quot;
+riscv64-unknown-linux-gnu-gcc -fPIC -O3 -nostdinc -nostdlib -nostartfiles -fvisibility=hidden -I deps/c-stdlin -I deps/c-stdlin/libc -I deps -I c -I build -Wall -Werror -Wno-nonnull -Wno-nonnull-compare -Wno-unused-function -g -Wl,-static -fdata-sections -ffunction-sections -Wl,--gc-sections -fPIC -fPIE -pie -Wl,--dynamic-list c/dual.syms -o build/all_dual c/all_dual.c
+</code></pre>
+<pre class="text"><code>╭─e@aol ~/Workspace/repo2 ‹master●›
+╰─$ make docker-interactive                                                                                                                                                                                       2 ↵
+docker run --user 1000:100 --rm -it -v &quot;/home/e/Workspace/repo2/:/code&quot; --workdir /code --entrypoint /bin/bash example/riscv-gnu-toolchain@sha256:bbe8a3f79705f67d505d1f1d5ddc694a4fd537ed1c7e9622420a470d59ba2ec3
+I have no name!@676a64b349b0:/code$ bear -- make
+bash: bear: command not found
+I have no name!@676a64b349b0:/code$ apt install bear
+E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)
+E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?
+I have no name!@676a64b349b0:/code$ sudo apt install bear
+bash: sudo: command not found
+I have no name!@676a64b349b0:/code$
+</code></pre>
+<h2 id="but-this-is-not-enough">But this is not enough</h2>
+<h3 id="exotic-toolchains-complex-build-time-dependencies-cross-compiling-static-linking">exotic toolchains, complex build time dependencies, cross compiling, static linking</h3>
+<pre class="text"><code>╭─e@aol ~/Workspace/repo2/tests/master ‹master●›
+╰─$ cargo build
+   Compiling example-tests v0.5.4 (/home/e/Workspace/repo2/tests/master)
+error: failed to run custom build command for `example-tests v0.5.4 (/home/e/Workspace/repo2/tests/master)`
+
+Caused by:
+  process didn't exit successfully: `/home/e/Workspace/repo2/tests/master/target/debug/build/example-tests-24343d618735db19/build-script-build` (exit status: 101)
+  --- stderr
+  thread 'main' panicked at 'Unable to find libclang: &quot;couldn't find any valid shared libraries matching: ['libclang.so', 'libclang-*.so', 'libclang.so.*', 'libclang-*.so.*'], set the `LIBCLANG_PATH` environment variable to a path where one of these files can be found (invalid: [])&quot;', /home/e/.cargo/registry/src/github.com-1ecc6299db9ec823/bindgen-0.59.2/src/lib.rs:2144:31
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</code></pre>
+<h3 id="one-more-thing-how-do-you-deliver-your-software">One more thing, how do you deliver your software?</h3>
+<ul>
+<li>hire a army of debian packagers, arch packages and redhat packages (of course, for free)?</li>
+<li>just use docker, once more?</li>
+</ul>
+<h1 id="how-nix-can-improve-development-workflow">How nix can improve development workflow</h1>
+<h2 id="no-cheat-lets-start-a-new-ubuntu-vm">No cheat, let’s start a new ubuntu VM</h2>
+<pre class="shell"><code>git clone git@github.com:contrun/talks.git
+cd talks
+# TODO: fix this
+git checkout xxx
+cd assets/nix
+vagrant up
+</code></pre>
+<h2 id="a-little-bit-magic">A little bit magic</h2>
+<pre class="shell"><code>nix build &quot;/vagrant#pkgsCross.riscv64.vim&quot;
+qemu-riscv64 ./result/bin/vim
+nix build &quot;/vagrant#pkgsStatic.hello&quot;
+file ./result/bin/hello
+</code></pre>
+<h2 id="more-magic">More magic</h2>
+<h3 id="production-nix">production nix</h3>
+<p><a href="https://blog.replit.com/nix">Replit - How we went from supporting 50 languages to all of them</a> TLDR: They used nix to make develop environtment for more than 50 languages.</p>
+<h3 id="real-world-software-building">real world software building</h3>
+<p><code>git clone https://github.com/njaremko/samael.git</code>. Three notable things.</p>
+<ol>
+<li><p>devlepoment time dependencies</p>
+<p>Each developer has a life, whose quality matters. You can improve it with nix and direnv.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode nix"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="ex">nativeBuildInputs</span> = with pkgs<span class="kw">;</span><span class="bu"> [</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>  rustPackages.rust-analyzer</span>
+<span id="cb9-3"><a href="#cb9-3"></a>  rustPackages.stable.toolchain</span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="bu">]</span> <span class="ex">++</span> commonNativeBuildInputs<span class="kw">;</span></span></code></pre></div>
+<pre class="shell"><code>command -v rust-analyzer
+cd samael
+command -v rust-analyzer
+</code></pre></li>
+<li><p>build time dependencies</p>
+<p>Before building this package, we need to generate rust bindings from c header files (basically a every complex compiler’s job). We need <code>libclang.so</code>, obtaining which is easy.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode nix"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">commonNativeBuildInputs</span> = with pkgs<span class="kw">;</span><span class="bu"> [</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a>  libiconv</span>
+<span id="cb11-3"><a href="#cb11-3"></a>  libtool</span>
+<span id="cb11-4"><a href="#cb11-4"></a>  libxml2</span>
+<span id="cb11-5"><a href="#cb11-5"></a>  libxslt</span>
+<span id="cb11-6"><a href="#cb11-6"></a>  llvmPackages.libclang</span>
+<span id="cb11-7"><a href="#cb11-7"></a>  openssl</span>
+<span id="cb11-8"><a href="#cb11-8"></a>  pkg-config</span>
+<span id="cb11-9"><a href="#cb11-9"></a>  xmlsec</span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="bu">]</span>;</span></code></pre></div>
+<pre class="shell"><code>echo $LIBCLANG_PATH
+cd samael
+echo $LIBCLANG_PATH
+</code></pre></li>
+<li><p>runtime dependencies</p>
+<p>Believe it or not, this is the hardest part. This is where the dependency hell is. Imagine A depends on openssl 1.1, B depends on openssl 3.0. What would you do to make A and B both works? To make things worse, what if A it self depends on B?</p>
+<pre class="shell"><code>cd samael
+cargo test --features xmlsec
+ldd ./target/debug/deps/samael-*
+</code></pre></li>
+</ol>
+<h1 id="anatomy-some-physiology-lesson">Anatomy (some physiology lesson)</h1>
+<ul>
+<li><p>nix is a DSL compiler which compiles high level nix expressions to nix derivations</p>
+<pre class="shell"><code>nix run &quot;/vagrant#emacs&quot; -- --batch --eval '(print system-configuration-options)'
+nix run &quot;/vagrant#emacsNativeComp&quot; -- --batch --eval '(print system-configuration-options)'
+</code></pre></li>
+<li><p>nix derivations are intermediate represensations which describe how to build software (well more than that)</p></li>
+<li><p>nixpkgs is an expert system which maintains a huge database of expressions to build softwares (well more than that)</p></li>
+</ul>
+<p><a href="https://repology.org/">Repology</a></p>
+<h2 id="anatomy-of-a-nix-flake">Anatomy of a nix flake</h2>
+<ul>
+<li><code>flake.nix</code> A mathematical function written in nix lang to transform inputs to outputs, where inputs are source code, outputs are description to things we want to build.</li>
+<li><code>flake.lock</code> Like <code>package-lock.json</code>, but for generic source.</li>
+</ul>
+<h2 id="anatomy-of-a-nix-derivation">Anatomy of a nix derivation</h2>
+<p><code>nix show-derivation "$HOME/Workspace/infra#pkgsCross.riscv64.vim"</code></p>
+<h2 id="anatomy-of-a-typical-nix-package">Anatomy of a typical nix package</h2>
+<h3 id="demostration">Demostration</h3>
+<pre class="text"><code>nix repl '&lt;nixpkgs&gt;'
+Welcome to Nix 2.9.2. Type :? for help.
+
+Loading '&lt;nixpkgs&gt;'...
+Added 16706 variables.
+
+nix-repl&gt; hello
+«derivation /nix/store/b7fpjb7dbyswq1ks41wwq5j7x9x9h9p8-hello-2.12.drv»
+
+nix-repl&gt; hello.meta
+{ available = true; broken = false; changelog = &quot;https://git.savannah.gnu.org/cgit/hello.git/plain/NEWS?h=v2.12&quot;; description = &quot;A program that produces a familiar, friendly greeting&quot;; homepage = &quot;https://www.gnu.org/software/hello/manual/&quot;; insecure = false; license = { ... }; longDescription = &quot;GNU Hello is a program that prints \&quot;Hello, world!\&quot; when you run it.\nIt is fully customizable.\n&quot;; maintainers = [ ... ]; name = &quot;hello-2.12&quot;; outputsToInstall = [ ... ]; platforms = [ ... ]; position = &quot;/nix/store/ngmq5s7v67mjy2w5yml3m224jw72xxw1-nixpkgs/nixpkgs/pkgs/applications/misc/hello/default.nix:34&quot;; unfree = false; unsupported = false; }
+
+nix-repl&gt; hello.
+hello.__ignoreNulls                hello.out
+hello.all                          hello.outPath
+hello.args                         hello.outputName
+hello.buildInputs                  hello.outputs
+hello.builder                      hello.override
+hello.configureFlags               hello.overrideAttrs
+hello.depsBuildBuild               hello.overrideDerivation
+hello.depsBuildBuildPropagated     hello.passthru
+hello.depsBuildTarget              hello.patches
+hello.depsBuildTargetPropagated    hello.pname
+hello.depsHostHost                 hello.propagatedBuildInputs
+hello.depsHostHostPropagated       hello.propagatedNativeBuildInputs
+hello.depsTargetTarget             hello.src
+hello.depsTargetTargetPropagated   hello.stdenv
+hello.doCheck                      hello.strictDeps
+hello.doInstallCheck               hello.system
+hello.drvAttrs                     hello.tests
+hello.drvPath                      hello.type
+hello.inputDerivation              hello.userHook
+hello.meta                         hello.version
+hello.name
+hello.nativeBuildInputs
+nix-repl&gt; hello.outputs
+[ &quot;out&quot; ]
+
+nix-repl&gt; hello.out
+«derivation /nix/store/b7fpjb7dbyswq1ks41wwq5j7x9x9h9p8-hello-2.12.drv»
+
+nix-repl&gt; hello.outPath
+&quot;/nix/store/k2wcigb78fsx3201kkr1290d9pdw4k74-hello-2.12&quot;
+
+nix-build '&lt;nixpkgs&gt;' -A hello
+this path will be fetched (0.04 MiB download, 0.17 MiB unpacked):
+  /nix/store/k2wcigb78fsx3201kkr1290d9pdw4k74-hello-2.12
+copying path '/nix/store/k2wcigb78fsx3201kkr1290d9pdw4k74-hello-2.12' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+/nix/store/k2wcigb78fsx3201kkr1290d9pdw4k74-hello-2.12
+</code></pre>
+<h3 id="peculiarities">Peculiarities</h3>
+<ul>
+<li>/nix/store</li>
+</ul>
+<p><a href="https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard">Filesystem Hierarchy Standard</a> is bad.</p>
+<ul>
+<li>k2wcigb78fsx3201kkr1290d9pdw4k74-hello-2.12</li>
+</ul>
+<pre class="shell"><code>nix build &quot;/vagrant#emacs&quot;
+realpath ./result
+nix build &quot;/vagrant#emacsNativeComp&quot;
+realpath ./result
+</code></pre>
+<ul>
+<li>the built binary</li>
+</ul>
+<pre class="text"><code>ldd ./result/bin/hello
+     linux-vdso.so.1 (0x00007ffcc89c8000)
+     libc.so.6 =&gt; /nix/store/ayrsyv7npr0lcbann4k9lxr19x813f0z-glibc-2.34-115/lib/libc.so.6 (0x00007f1c32321000)
+     /nix/store/ayrsyv7npr0lcbann4k9lxr19x813f0z-glibc-2.34-115/lib/ld-linux-x86-64.so.2 =&gt; /nix/store/ayrsyv7npr0lcbann4k9lxr19x813f0z-glibc-2.34-115/lib64/ld-linux-x86-64.so.2 (0x00007f1c32522000)
+</code></pre>
+<h2 id="anatomy-of-a-nix-building-process">Anatomy of a nix building process</h2>
+<pre class="text"><code>nix-shell '&lt;nixpkgs&gt;' -A hello
+these 12 paths will be fetched (6.99 MiB download, 44.15 MiB unpacked):
+  /nix/store/8s2dv1q4x19cjj0j3f3318zqwnr4490m-bash-interactive-5.1-p16-info
+  /nix/store/9izhv7bayzj8sr7m5n7c4qw1qk2fhq9s-binutils-2.38
+  /nix/store/aq67a6bzcjyh6rcjj78miirqjl9rav72-gcc-wrapper-11.3.0
+  /nix/store/d5as7049v0l1gm0j6x6kv7jnkwx5gqmh-expand-response-params
+  /nix/store/mjv4xxiza91sxxvh81xa4a17kqss1alk-readline-8.1p2
+  /nix/store/mnlzywchssnw8y1xb3qsfv6ifrh503sy-bash-interactive-5.1-p16-doc
+  /nix/store/mrx063r275hqvi5ixb2zckzfyk1bvp2y-bash-interactive-5.1-p16-man
+  /nix/store/p3d2d5i526vsmdwiwchbcswy57gz7ipv-bash-interactive-5.1-p16-dev
+  /nix/store/s3lywc6f8xd9b4vdakp03mqlw1iknay5-stdenv-linux
+  /nix/store/wicpy8xpj34skkd76y95rfmg1l880qxm-ncurses-6.3-p20220507
+  /nix/store/wvfcmk36krxvxip5j9374h8h8flpa0ic-binutils-wrapper-2.38
+  /nix/store/zxn21d03iv66n147ff90j8m5mh5xl0x6-bash-interactive-5.1-p16
+copying path '/nix/store/mnlzywchssnw8y1xb3qsfv6ifrh503sy-bash-interactive-5.1-p16-doc' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/8s2dv1q4x19cjj0j3f3318zqwnr4490m-bash-interactive-5.1-p16-info' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/mrx063r275hqvi5ixb2zckzfyk1bvp2y-bash-interactive-5.1-p16-man' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/9izhv7bayzj8sr7m5n7c4qw1qk2fhq9s-binutils-2.38' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/d5as7049v0l1gm0j6x6kv7jnkwx5gqmh-expand-response-params' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/wicpy8xpj34skkd76y95rfmg1l880qxm-ncurses-6.3-p20220507' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/wvfcmk36krxvxip5j9374h8h8flpa0ic-binutils-wrapper-2.38' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/mjv4xxiza91sxxvh81xa4a17kqss1alk-readline-8.1p2' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/aq67a6bzcjyh6rcjj78miirqjl9rav72-gcc-wrapper-11.3.0' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/zxn21d03iv66n147ff90j8m5mh5xl0x6-bash-interactive-5.1-p16' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/s3lywc6f8xd9b4vdakp03mqlw1iknay5-stdenv-linux' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+copying path '/nix/store/p3d2d5i526vsmdwiwchbcswy57gz7ipv-bash-interactive-5.1-p16-dev' from 'https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store'...
+
+[nix-shell:~]$ declare -f genericBuild
+</code></pre>
+<pre class="shell"><code>genericBuild ()
+{
+    if [ -f &quot;${buildCommandPath:-}&quot; ]; then
+        source &quot;$buildCommandPath&quot;;
+        return;
+    fi;
+    if [ -n &quot;${buildCommand:-}&quot; ]; then
+        eval &quot;$buildCommand&quot;;
+        return;
+    fi;
+    if [ -z &quot;${phases:-}&quot; ]; then
+        phases=&quot;${prePhases:-} unpackPhase patchPhase ${preConfigurePhases:-}             configurePhase ${preBuildPhases:-} buildPhase checkPhase             ${preInstallPhases:-} installPhase ${preFixupPhases:-} fixupPhase installCheckPhase             ${preDistPhases:-} distPhase ${postPhases:-}&quot;;
+    fi;
+    for curPhase in $phases;
+    do
+        if [[ &quot;$curPhase&quot; = unpackPhase &amp;&amp; -n &quot;${dontUnpack:-}&quot; ]]; then
+            continue;
+        fi;
+        if [[ &quot;$curPhase&quot; = patchPhase &amp;&amp; -n &quot;${dontPatch:-}&quot; ]]; then
+            continue;
+        fi;
+        if [[ &quot;$curPhase&quot; = configurePhase &amp;&amp; -n &quot;${dontConfigure:-}&quot; ]]; then
+            continue;
+        fi;
+        if [[ &quot;$curPhase&quot; = buildPhase &amp;&amp; -n &quot;${dontBuild:-}&quot; ]]; then
+            continue;
+        fi;
+        if [[ &quot;$curPhase&quot; = checkPhase &amp;&amp; -z &quot;${doCheck:-}&quot; ]]; then
+            continue;
+        fi;
+        if [[ &quot;$curPhase&quot; = installPhase &amp;&amp; -n &quot;${dontInstall:-}&quot; ]]; then
+            continue;
+        fi;
+        if [[ &quot;$curPhase&quot; = fixupPhase &amp;&amp; -n &quot;${dontFixup:-}&quot; ]]; then
+            continue;
+        fi;
+        if [[ &quot;$curPhase&quot; = installCheckPhase &amp;&amp; -z &quot;${doInstallCheck:-}&quot; ]]; then
+            continue;
+        fi;
+        if [[ &quot;$curPhase&quot; = distPhase &amp;&amp; -z &quot;${doDist:-}&quot; ]]; then
+            continue;
+        fi;
+        if [[ -n $NIX_LOG_FD ]]; then
+            echo &quot;@nix { \&quot;action\&quot;: \&quot;setPhase\&quot;, \&quot;phase\&quot;: \&quot;$curPhase\&quot; }&quot; 1&gt;&amp;$NIX_LOG_FD;
+        fi;
+        showPhaseHeader &quot;$curPhase&quot;;
+        dumpVars;
+        local startTime=$(date +&quot;%s&quot;);
+        eval &quot;${!curPhase:-$curPhase}&quot;;
+        local endTime=$(date +&quot;%s&quot;);
+        showPhaseFooter &quot;$curPhase&quot; &quot;$startTime&quot; &quot;$endTime&quot;;
+        if [ &quot;$curPhase&quot; = unpackPhase ]; then
+            [ -z &quot;${sourceRoot}&quot; ] || chmod +x &quot;${sourceRoot}&quot;;
+            cd &quot;${sourceRoot:-.}&quot;;
+        fi;
+    done
+}
+</code></pre>
+<h1 id="further-references">Further references</h1>
+<h2 id="how-nix-can-improve-software-delivery">How nix can improve software delivery</h2>
+<h3 id="nix-run">nix run</h3>
+<p>nix run github:tweag/gomod2nix</p>
+<h3 id="docker">Docker</h3>
+<p>nixpacks</p>
+<h3 id="nixops-nixos-containers">nixops, nixos containers</h3>
+<p>NixOS</p>
+
+
+    </section>
+  </article>
+  
+</body>
+</html>
