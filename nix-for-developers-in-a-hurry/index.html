@@ -238,13 +238,12 @@ ldd ./target/debug/deps/samael-*
 <pre class="shell"><code>nix run &quot;/vagrant#emacs&quot; -- --batch --eval '(print system-configuration-options)'
 nix run &quot;github:contrun/talks?dir=assets/nix#emacsNativeComp&quot; -- --batch --eval '(print system-configuration-options)'
 </code></pre></li>
-<li><p>nix derivations are intermediate represensations which describe how to build software (well more than that)</p></li>
-<li><p>nixpkgs is an expert system which maintains a huge database of expressions to build softwares (well more than that)</p></li>
+<li><p>nix derivations are intermediate represensations which describe how to build software (well, more than that)</p></li>
+<li><p>nixpkgs is an expert system which maintains a huge database of expressions to build softwares (actually the largest package collection, see <a href="https://repology.org/">Repology</a>, and it’s more than that)</p></li>
 </ul>
-<p><a href="https://repology.org/">Repology</a></p>
 <h2 id="anatomy-of-a-nix-flake">Anatomy of a nix flake</h2>
 <ul>
-<li><code>flake.nix</code> A mathematical function written in nix lang to transform inputs to outputs, where inputs are source code, outputs are description to things we want to build.</li>
+<li><code>flake.nix</code> A pure function (in the sense of mathemaitical functions) written in nix lang to transform inputs to outputs, where inputs are source code, outputs are description to things we want to build.</li>
 <li><code>flake.lock</code> Like <code>package-lock.json</code>, but for generic source.</li>
 </ul>
 <h2 id="anatomy-of-a-nix-derivation">Anatomy of a nix derivation</h2>
@@ -303,11 +302,8 @@ copying path '/nix/store/k2wcigb78fsx3201kkr1290d9pdw4k74-hello-2.12' from 'http
 </code></pre>
 <h3 id="peculiarities">Peculiarities</h3>
 <ul>
-<li>/nix/store</li>
-</ul>
-<p><a href="https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard">Filesystem Hierarchy Standard</a> is bad.</p>
-<ul>
-<li>k2wcigb78fsx3201kkr1290d9pdw4k74-hello-2.12</li>
+<li><p>/nix/store, aka <a href="https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard">Filesystem Hierarchy Standard</a> is bad</p></li>
+<li><p>k2wcigb78fsx3201kkr1290d9pdw4k74-hello-2.12</p></li>
 </ul>
 <pre class="shell"><code>nix build &quot;/vagrant#emacs&quot;
 realpath ./result
