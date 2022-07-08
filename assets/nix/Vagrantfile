@@ -64,7 +64,10 @@ Vagrant.configure("2") do |config|
   # Ansible, Chef, Docker, Puppet and Salt are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    [[ -z "$(find -H /var/lib/apt/lists -maxdepth 0 -mtime -3)" ]] && apt-get update
+    sed -e 's%http://archive.ubuntu.com/ubuntu%mirror://mirrors.ubuntu.com/mirrors.txt%' /etc/apt/sources.list > /tmp/sources.list
+    if diff /etc/apt/sources.list /tmp/sources.list || [[ -z "$(find -H /var/lib/apt/lists -maxdepth 0 -mtime -3)" ]]; then
+      apt-get update
+    fi
     apt-get install -y qemu qemu-user docker git
   SHELL
 

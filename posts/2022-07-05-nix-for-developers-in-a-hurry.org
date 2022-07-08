@@ -2,16 +2,16 @@
 #+DATE: Tue, 05 Jul 2022 11:27:49 +0800
 #+SLUG: nix-for-developers-in-a-hurry
 
-* Introduction
-软件开发者生命的很大一部分时间花费在熟悉外部工具来管理依赖（包含编译时依赖、运行时依赖）和分发软件上面。有了容器之后，依赖管理、软件分发是否已经是已经完全解决的问题？不，很多情况下，使用 docker 来构建和分发软件都是一个次优方案。本次报告将会介绍一个新的、几乎全能的工具——nix。每隔一段时间，一些关于 nix 文章就会出现在 [[https://hn.algolia.com/?dateRange=all&page=0&prefix=true&query=nix&sort=byPopularity&type=story][hacker news]] 或者是 [[https://lobste.rs/search?q=nix&what=stories&order=points][Lobsters]] 首页。一方面，评论中总是有很多 nix zealots 说 ta 多么希望能够早点认识和使用 nix，另一方面也不乏 nix cynic 抱怨为什么需要这样 overhype nix，他们声称现在的工具完全可以解决他们的问题。本次报告正是另外一个 nix zealot 为转变 nix cynics 看法所做的另外一个尝试。
+# * Introduction
+# 软件开发者生命的很大一部分时间花费在熟悉外部工具来管理依赖（包含编译时依赖、运行时依赖）和分发软件上面。有了容器之后，依赖管理、软件分发是否已经是已经完全解决的问题？不，很多情况下，使用 docker 来构建和分发软件都是一个次优方案。本次报告将会介绍一个新的、几乎全能的工具——nix。每隔一段时间，一些关于 nix 文章就会出现在 [[https://hn.algolia.com/?dateRange=all&page=0&prefix=true&query=nix&sort=byPopularity&type=story][hacker news]] 或者是 [[https://lobste.rs/search?q=nix&what=stories&order=points][Lobsters]] 首页。一方面，评论中总是有很多 nix zealots 说 ta 多么希望能够早点认识和使用 nix，另一方面也不乏 nix cynic 抱怨为什么需要这样 overhype nix，他们声称现在的工具完全可以解决他们的问题。本次报告正是另外一个 nix zealot 为转变 nix cynics 看法所做的另外一个尝试。
 
-本报告首先将会回顾一些常见的软件开发、发布工作流中存在的不便之处（不识庐山真面目，只缘身在此山中），之后我会 demo 一些魔法，这些魔法将会清楚地显露出 nix 如何优雅地解决这些问题（并拯救我们失落的灵魂），然后我会介绍稍微介绍一下魔法是如何变出来的以及这些魔法后面的原理（我们无法区分足够先进的技术和魔法），最后我会稍微提一下 nix 可以在其他的哪些地方提升你的生活品质（当你有了一把锤子，那么生活中的钉子还会少吗）。
+# 本报告首先将会回顾一些常见的软件开发、发布工作流中存在的不便之处（不识庐山真面目，只缘身在此山中），之后我会 demo 一些魔法，这些魔法将会清楚地显露出 nix 如何优雅地解决这些问题（并拯救我们失落的灵魂），然后我会介绍稍微介绍一下魔法是如何变出来的以及这些魔法后面的原理（我们无法区分足够先进的技术和魔法），最后我会稍微提一下 nix 可以在其他的哪些地方提升你的生活品质（当你有了一把锤子，那么生活中的钉子还会少吗）。
 
-警告：本报告可能会永远地改变你对软件编译和软件分发的看法并让你成为一个狂热分子。
+# 警告：本报告可能会永远地改变你对软件编译和软件分发的看法并让你成为一个狂热分子。
 
-附：一点有助于直观上感受 nix 是一个什么东西的资料
-+ [[https://nixos.org][Nix 官网上面的一些 demo（请点击右侧的 asciinema 以及下面的 examples）]]
-+ [[https://xeiaso.net/blog/i-was-wrong-about-nix-2020-02-10][I was Wrong about Nix]]
+# 附：一点有助于直观上感受 nix 是一个什么东西的资料
+# + [[https://nixos.org][Nix 官网上面的一些 demo（请点击右侧的 asciinema 以及下面的 examples）]]
+# + [[https://xeiaso.net/blog/i-was-wrong-about-nix-2020-02-10][I was Wrong about Nix]]
 
 * How we build and deliver software today
 To build a some non-trivial package, we need
@@ -203,16 +203,16 @@ A and B both works? To make things worse, what if A it self depends on B?
     nix run "/vagrant#emacs" -- --batch --eval '(print system-configuration-options)'
     nix run "github:contrun/talks?dir=assets/nix#emacsNativeComp" -- --batch --eval '(print system-configuration-options)'
   #+end_src
-+ nix derivations are intermediate represensations which describe how to build software (well more than that)
-+ nixpkgs is an expert system which maintains a huge database of expressions to build softwares (well more than that)
-[[https://repology.org/][Repology]]
++ nix derivations are intermediate represensations which describe how to build software (well, more than that)
++ nixpkgs is an expert system which maintains a huge database of expressions to build softwares (actually the largest package collection, see [[https://repology.org/][Repology]], and it's more than that)
 
 ** Anatomy of a nix flake
 #+INCLUDE: ../assets/nix/flake.nix src nix
 
-+ ~flake.nix~ A mathematical function written in nix lang to transform inputs to outputs,
++ ~flake.nix~ A pure function (in the sense of mathemaitical functions) written in nix lang to transform inputs to outputs,
   where inputs are source code, outputs are description to things we want to build.
 + ~flake.lock~ Like ~package-lock.json~, but for generic source.
+
 ** Anatomy of a nix derivation
 ~nix show-derivation "$HOME/Workspace/infra#pkgsCross.riscv64.vim"~
 
@@ -273,8 +273,7 @@ copying path '/nix/store/k2wcigb78fsx3201kkr1290d9pdw4k74-hello-2.12' from 'http
 #+end_src
 
 *** Peculiarities
-+ /nix/store
-[[https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard][Filesystem Hierarchy Standard]] is bad.
++ /nix/store, aka [[https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard][Filesystem Hierarchy Standard]] is bad
 
 + k2wcigb78fsx3201kkr1290d9pdw4k74-hello-2.12
 #+begin_src shell
