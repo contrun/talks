@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+<script defer type="text/javascript" src="../vendor/katex/katex.min.js"></script>
+<script defer type="text/javascript" src="../vendor/katex/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+  
+  <link rel="stylesheet" type="text/css" href="../css/syntax.css">
+  <link rel="stylesheet" type="text/css" href="../css/tufte.css">
+  <link rel="stylesheet" type="text/css" href="../css/custom.css">
+  
+  <title>take all your belongings with you - talks</title>
+  
+</head>
+<body>
+        <nav class="group">
+          <a href="../">home</a>
+          <a href="https://github.com/contrun/talks/">github</a>
+      </nav>
+
+  <article>
+    <section>
+      <div class="post_title">
+  <h2 class="post_title"><a href=".././take-all-your-belongings-with-you/">take all your belongings with you</a></h2>
+</div>
+
+<div class="info">
+    Posted on September  4, 2022
+    
+</div>
+
+
+<div class="toc"><div class="header">Table of Contents</div>
+<ul>
+<li><a href="#why">Why</a>
+<ul>
+<li><a href="#intellectual-humiliation">Intellectual humiliation</a></li>
+<li><a href="#gaining-insights-for-your-digital-life">Gaining insights for your digital life</a></li>
+<li><a href="#freedom-as-an-utility">Freedom as an utility</a>
+<ul>
+<li><a href="#the-freedom-to-run-copy-distribute-study-change-and-improve-the-software">The freedom to run, copy, distribute, study, change and improve the software</a></li>
+<li><a href="#free-from-fear">Free from fear</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#tenants">Tenants</a>
+<ul>
+<li><a href="#offline-first">Offline first</a>
+<ul>
+<li><a href="#whats-it">What’s it?</a></li>
+<li><a href="#why-is-it-important">Why is it important?</a></li>
+<li><a href="#see-also">See also</a></li>
+</ul></li>
+<li><a href="#bring-your-own-client">Bring your own client</a>
+<ul>
+<li><a href="#whats-it-1">What’s it?</a></li>
+<li><a href="#why-is-it-important-1">Why is it important?</a></li>
+</ul></li>
+<li><a href="#interoperability">Interoperability</a>
+<ul>
+<li><a href="#whats-it-2">What’s it?</a></li>
+<li><a href="#why-is-it-important-2">Why is it important?</a></li>
+</ul></li>
+<li><a href="#weak-centralization">Weak centralization</a>
+<ul>
+<li><a href="#whats-it-3">What’s it?</a></li>
+<li><a href="#why-is-it-important-3">Why is it important?</a></li>
+</ul></li>
+<li><a href="#data-portability">Data Portability</a>
+<ul>
+<li><a href="#examples">Examples</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#show-case">Show case</a>
+<ul>
+<li><a href="#calibre-web"><span>calibre web</span></a></li>
+<li><a href="#datasette"><span>datasette</span></a></li>
+<li><a href="#smos"><span>smos</span></a></li>
+<li><a href="#organice"><span>organice</span></a></li>
+<li><a href="#keeweb"><span>keeweb</span></a></li>
+<li><a href="#aria2"><span>aria2</span></a></li>
+<li><a href="#grocy"><span>grocy</span></a></li>
+<li><a href="#rclonesftpgo"><span>rclone</span>/<span>sftpgo</span></a></li>
+<li><a href="#code-server"><span>code-server</span></a></li>
+</ul></li>
+<li><a href="#selected-topics">Selected topics</a>
+<ul>
+<li><a href="#service-provision">Service provision</a>
+<ul>
+<li><a href="#off-the-shelf-solutions">Off-the-shelf solutions</a></li>
+<li><a href="#my-take">My take</a></li>
+</ul></li>
+<li><a href="#remote-access">Remote access</a>
+<ul>
+<li><a href="#exposing-http-services">exposing http services</a></li>
+<li><a href="#remote-editing">remote editing</a></li>
+<li><a href="#remote-shell-access">remote shell access</a></li>
+</ul></li>
+<li><a href="#synchronization">synchronization</a>
+<ul>
+<li><a href="#syncthing"><span>Syncthing</span></a></li>
+<li><a href="#rclone-bisync"><span>rclone</span> bisync</a></li>
+<li><a href="#cryptomator"><span>cryptomator</span></a></li>
+<li><a href="#rclonesftpgo-1"><span>rclone</span>/<span>sftpgo</span></a></li>
+</ul></li>
+<li><a href="#backup">Backup</a>
+<ul>
+<li><a href="#cavets">Cavets</a></li>
+<li><a href="#file-system-backup">File system backup</a></li>
+<li><a href="#file-system-agnostic-backup">File system agnostic backup</a></li>
+<li><a href="#see-also-1">See also</a></li>
+</ul></li>
+<li><a href="#security">Security</a></li>
+<li><a href="#cicd">CI/CD</a></li>
+<li><a href="#observability">Observability</a></li>
+</ul></li>
+</ul>
+</div>
+<h1 id="why">Why</h1>
+<h2 id="intellectual-humiliation">Intellectual humiliation</h2>
+<p>They exploit your data, and then take your data as hostage to let they continue their exploiting. A Real world metaphor <a href="https://www.bbc.com/news/world-middle-east-62514631">Lebanon man hailed hero for holding Beirut bank hostage over savings - BBC News</a></p>
+<h2 id="gaining-insights-for-your-digital-life">Gaining insights for your digital life</h2>
+<p>An unexamined life is not worth living, aka did you update your facebook status today?</p>
+<ul>
+<li><a href="https://writings.stephenwolfram.com/2019/02/seeking-the-productive-life-some-details-of-my-personal-infrastructure/">Seeking the Productive Life: Some Details of My Personal Infrastructure—Stephen Wolfram Writings</a></li>
+<li><a href="https://beepb00p.xyz/myinfra.html">Map of my personal data infrastructure | beepb00p</a></li>
+<li><a href="https://calebschoepp.com/blog/2022/productivity-porn/">Productivity Porn - Caleb Schoepp</a></li>
+</ul>
+<h2 id="freedom-as-an-utility">Freedom as an utility</h2>
+<p>Just having the possibility is exulting.</p>
+<blockquote>
+<p>希望本无所谓有，也无所谓无，这就像地上的路，其实地上本没有路，走的人多了，也便成了路。</p>
+</blockquote>
+<h3 id="the-freedom-to-run-copy-distribute-study-change-and-improve-the-software">The freedom to run, copy, distribute, study, change and improve the software</h3>
+<p>My personal story. I read a lot of articles with <a href="https://getpocket.com/">Pocket</a>. The search function of Pocket works poorly. I frequently find myself unable to recall some articles I saved on pocket. I am pretty excited about Mozilla’s acquisition of pocket, I imagine it would be easier for me to export my data, and auto-label the articles I read on pocket. My wish is like waiting for Godot, it bears no fruits. <a href="https://github.com/Pocket/extension-save-to-pocket/issues/75">Open source Pocket server-side code</a> I want the potential of improving some software I used everyday.</p>
+<h3 id="free-from-fear">Free from fear</h3>
+<ul>
+<li>Imagine one day you wake up to found out your google account is locked.</li>
+</ul>
+<p><a href="https://hn.algolia.com/?dateRange=all&amp;page=0&amp;prefix=true&amp;query=google%20account&amp;sort=byPopularity&amp;type=story">google account Algolia search</a></p>
+<ul>
+<li>What about your wechat account is deactivated?</li>
+</ul>
+<p><a href="https://www.tmtpost.com/4661135.html">一男子因微信被封号跳楼自杀，腾讯回应：涉嫌色情骚扰</a></p>
+<h1 id="tenants">Tenants</h1>
+<h2 id="offline-first">Offline first</h2>
+<h3 id="whats-it">What’s it?</h3>
+<p><a href="https://offlinefirst.org/">Offline First</a></p>
+<h3 id="why-is-it-important">Why is it important?</h3>
+<p>High avaibility in the presense of network partition, But what about inconsitence, not critical in the case of personal computing. Also may use all the standard methods to solve inconsistency.</p>
+<h3 id="see-also">See also</h3>
+<p><a href="https://rxdb.info/downsides-of-offline-first.html">Downsides of Offline First</a></p>
+<h2 id="bring-your-own-client">Bring your own client</h2>
+<h3 id="whats-it-1">What’s it?</h3>
+<p><a href="https://www.geoffreylitt.com/2021/03/05/bring-your-own-client.html">Bring Your Own Client</a></p>
+<h3 id="why-is-it-important-1">Why is it important?</h3>
+<p>Email clients as an example. Read and write email with <a href="https://www.djcbsoftware.nl/code/mu/mu4e/">mu4e</a> in emacs!</p>
+<h2 id="interoperability">Interoperability</h2>
+<h3 id="whats-it-2">What’s it?</h3>
+<p><a href="https://www.eff.org/deeplinks/2020/07/legislative-path-interoperable-internet">A Legislative Path to an Interoperable Internet</a></p>
+<h3 id="why-is-it-important-2">Why is it important?</h3>
+<p>Not only client Interoperable with the server. Also data portability, back-end interoperability, and delegability. Take <a href="https://joinbookwyrm.com/">BookWyrm</a> as an example.</p>
+<h2 id="weak-centralization">Weak centralization</h2>
+<h3 id="whats-it-3">What’s it?</h3>
+<p>Another Penrose triangle</p>
+<h3 id="why-is-it-important-3">Why is it important?</h3>
+<p>Take <a href="https://github.com/ellie/atuin">atuin</a> as an example.</p>
+<h2 id="data-portability">Data Portability</h2>
+<h3 id="examples">Examples</h3>
+<ul>
+<li><a href="https://github.com/karlicoss/HPI">GitHub - karlicoss/HPI: Human Programming Interface</a></li>
+<li><a href="https://n8n.io/">n8n.io - a powerful workflow automation tool</a></li>
+<li><a href="https://datasette.io/">Datasette: An open source multi-tool for exploring and publishing data</a></li>
+<li><a href="https://perkeep.org/">Perkeep</a></li>
+<li><a href="https://github.com/upspin/upspin">upspin/upspin: Upspin: A framework for naming everyone’s everything.</a></li>
+</ul>
+<h1 id="show-case">Show case</h1>
+<h2 id="calibre-web"><a href="https://github.com/janeczku/calibre-web">calibre web</a></h2>
+<p>Show how large my personal digital libraray is, and why it can’t be done with a public service. This also applies to your music/video library.</p>
+<h2 id="datasette"><a href="https://github.com/simonw/datasette">datasette</a></h2>
+<p>Explore my pocket data with datasette. Also mention powerful bussiness intelligence tools in the context of personal data.</p>
+<h2 id="smos"><a href="https://github.com/NorfairKing/smos">smos</a></h2>
+<p>Show how amazing is smos a productivity tool, and how c</p>
+<h2 id="organice"><a href="https://github.com/200ok-ch/organice">organice</a></h2>
+<p>Indicate why I am inifinitely more productive with my emacs config, and how I can choose my own tools.</p>
+<h2 id="keeweb"><a href="https://github.com/keeweb/keeweb">keeweb</a></h2>
+<p>Store everything I have on the Internet without fear.</p>
+<h2 id="aria2"><a href="https://github.com/aria2/aria2">aria2</a></h2>
+<p>Download things from the office, use it when arriving home.</p>
+<h2 id="grocy"><a href="https://github.com/grocy/grocy">grocy</a></h2>
+<p>What can you make with all the materials in your refrigerator?</p>
+<h2 id="rclonesftpgo"><a href="https://github.com/rclone/rclone">rclone</a>/<a href="https://github.com/drakkan/sftpgo">sftpgo</a></h2>
+<p>Mount remote storage, and expose them in a standarized interface.</p>
+<h2 id="code-server"><a href="https://github.com/coder/code-server">code-server</a></h2>
+<p>Edit files with your favrioute editor, but on the web and with all your files.</p>
+<h1 id="selected-topics">Selected topics</h1>
+<h2 id="service-provision">Service provision</h2>
+<h3 id="off-the-shelf-solutions">Off-the-shelf solutions</h3>
+<p>Fear not, we already have multiple solutions designed for this niche market. <a href="https://github.com/awesome-selfhosted/awesome-selfhosted#self-hosting-solutions">awesome-selfhosted/awesome-selfhosted Self-hosting Solutions</a></p>
+<h3 id="my-take">My take</h3>
+<p>See <a href="https://github.com/contrun/infra/">repo</a>.</p>
+<h2 id="remote-access">Remote access</h2>
+<h3 id="exposing-http-services">exposing http services</h3>
+<ol>
+<li><p>connectivity</p>
+<ol>
+<li><p>DDNS + router port mapping</p>
+<p>Need to dial up with your router, not the fiber optic modem. You may do all the DDNS port mapping work in the router if your router is flexible enough. Or you may run <a href="https://github.com/miniupnp/miniupnp">miniupnp</a> in your server.</p></li>
+<li><p>remote port mapping</p>
+<p><a href="https://www.harding.motd.ca/autossh/">autossh</a> (my favorite), <a href="https://ngrok.com/">ngrok</a>, <a href="https://github.com/fatedier/frp">frp</a>, <a href="https://github.com/ehang-io/nps">nps</a>. Not enough if you have a few hosts to manage.</p></li>
+<li><p><a href="https://www.torproject.org/">TOR</a></p>
+<p>With a relay network, but it not so censorship-resistant.</p></li>
+<li><p>Static VPN solutions</p>
+<p>Wireguard is not dynamic enough. O(n) cost for a new host. Manually IPAM (ip addresses management). Not able to penetrate double-NAT.</p></li>
+<li><p>Magic overlay networks</p>
+<p>All computer science problems can be solved by adding a new layer of indirection. There are many solutions, e.g. <a href="https://github.com/zerotier/ZeroTierOne">zerotier</a>, <a href="https://github.com/tailscale/tailscale">tailscale</a>, <a href="https://github.com/gravitl/netmaker">netmaker</a>, <a href="https://github.com/tonarino/innernet">innernet</a>, <a href="https://github.com/slackhq/nebula">nebula</a>, <a href="https://github.com/juanfont/headscale">headscale</a>, <a href="https://github.com/netbirdio/netbird">netbird</a>, <a href="https://github.com/firezone/firezone">firezone</a>.</p>
+<ul>
+<li>Single sign-on</li>
+<li>Auto hole punching</li>
+<li>Fallback to relay host when necessary</li>
+<li>Whole network stack available</li>
+</ul></li>
+</ol></li>
+<li><p>node discovery</p>
+<ol>
+<li><p>MDNS/LLMNR</p>
+<p>Ever wonder how timemachine server on your LAN is discovered, or why you can just ping hostname in Windows? Free lunch if your overlay network supports multicast.</p></li>
+<li><p>Coredns</p>
+<p>More magic.</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Split-horizon_DNS">Split-horizon DNS</a>, i.e. resolving <code>hostname.example.com</code> to <code>hostname.local</code> in LAN, or else resolving it</li>
+</ul>
+<p>to edge proxies.</p>
+<ul>
+<li>Wildcard DNS record, i.e. cnaming <code>*.hostname.example.com</code> to <code>hostanme.example.com</code></li>
+</ul></li>
+</ol></li>
+<li><p>http routing</p>
+<p>Dynamic and self organizing.</p>
+<ol>
+<li><p>SSL termination</p></li>
+<li><p>Routing rules</p></li>
+</ol></li>
+</ol>
+<h3 id="remote-editing">remote editing</h3>
+<ul>
+<li><a href="https://mosh.org/">mosh</a> + <a href="https://github.com/tmux/tmux/">tmux</a> + <a href="https://neovim.io/">neovim</a></li>
+<li><a href="https://wezfurlong.org/wezterm/">wezterm</a></li>
+<li><a href="https://www.gnu.org/software/tramp/">emacs TRAMP</a></li>
+<li><a href="https://code.visualstudio.com/docs/remote/remote-overview">vscode remote</a></li>
+<li><a href="https://github.com/coder/code-server">code-server</a></li>
+<li><a href="https://www.jetbrains.com/fleet/">jetbrains fleet</a></li>
+<li><a href="https://www.eclipse.org/che/">eclipse che</a></li>
+</ul>
+<h3 id="remote-shell-access">remote shell access</h3>
+<ul>
+<li>ssh ProxyJump</li>
+<li>tailscale/zerotier</li>
+<li><a href="https://github.com/tsl0922/ttyd">ttyd</a></li>
+<li><a href="https://github.com/erebe/wstunnel">wstunnel</a></li>
+<li><a href="https://github.com/octeep/wireproxy">wireproxy</a>/<a href="https://github.com/aramperes/onetun">onetun</a></li>
+</ul>
+<h2 id="synchronization">synchronization</h2>
+<h3 id="syncthing"><a href="https://syncthing.net/">Syncthing</a></h3>
+<p>Syncing without a 7x24 hour listening server</p>
+<h3 id="rclone-bisync"><a href="https://github.com/rclone/rclone">rclone</a> bisync</h3>
+<ul>
+<li>Rich back end api support, almost supports every backend storage under the sun</li>
+<li>Highly modular architecte, may optionaly chunk, encrypt another repo</li>
+</ul>
+<h3 id="cryptomator"><a href="https://cryptomator.org/">cryptomator</a></h3>
+<ul>
+<li>Mounting common storage backends</li>
+<li>Encryption at rest</li>
+<li>Easy to use</li>
+</ul>
+<h3 id="rclonesftpgo-1"><a href="https://github.com/rclone/rclone">rclone</a>/<a href="https://github.com/drakkan/sftpgo">sftpgo</a></h3>
+<ul>
+<li>Serving the synced files while syncing is not set up on a temporary device</li>
+<li>With web interface</li>
+<li>Supporting access with webdav/sftp etc</li>
+</ul>
+<h2 id="backup">Backup</h2>
+<h3 id="cavets">Cavets</h3>
+<p>The <a href="https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use">Time-of-check to time-of-use</a> problem in the case of data backup. An almost harmless example is that the backup software first reads the <code>dirent</code> to get a list of all files, and then it tries to read the file content, now it founds out the file is no longer there. So backing up this file failed. A more pernicious example is that the backup software backs up two inconsistent part of a file, thus results in file corruption. If you want to be absolutely sure about the integerity of the file, you can either let the underlying software so its back up job, or create a file system level snapshot.</p>
+<h3 id="file-system-backup">File system backup</h3>
+<ul>
+<li>snapshotting, e.g. <a href="https://github.com/zfsonlinux/zfs-auto-snapshot">zfsonlinux/zfs-auto-snapshot</a></li>
+<li>backup, e.g. <a href="https://github.com/jimsalterjrs/sanoid/">jimsalterjrs/sanoid</a></li>
+</ul>
+<h3 id="file-system-agnostic-backup">File system agnostic backup</h3>
+<p>Two style of backing up</p>
+<ul>
+<li>Create an archive and forget it. When the back up lags behind current state too much. Create a new backup and overwrite existing one.</li>
+<li>Continuous, incremental back up some directory. Everything the back job runs, the backup software create a snapshot, tries to deduplicate file contents.</li>
+</ul>
+<ol>
+<li><p>tar</p>
+<pre class="shell"><code>tar -C &quot;$HOME&quot; -cpaf - --one-file-system --exclude-vcs-ignores --exclude-backups --exclude-caches-all --exclude=&quot;$encrypted_backup_file&quot; &quot;$HOME&quot; | gpg --yes --pinentry-mode loopback --symmetric --cipher-algo aes256 -o &quot;$encrypted_backup_file&quot;
+</code></pre></li>
+<li><p>rclone</p>
+<pre class="shell"><code>rclone sync ~/Sync/ backup-primary-encrypted:/sync/
+cat ~/.config/rclone/rclone.conf
+[backup-primary-encrypted]
+type = crypt
+remote = backup-primary:encrypted
+password = passwordheree
+</code></pre></li>
+<li><p><a href="https://github.com/restic/restic/">restic</a></p>
+<ul>
+<li>With all the rclone backends</li>
+<li>Encryption, deduplication, incremental backup</li>
+<li>No compression</li>
+</ul></li>
+<li><p><a href="https://github.com/borgbackup/borg/">borgbackup</a></p>
+<ul>
+<li>Can only back up to host with ssh access, or back up locally</li>
+<li>Encryption, deduplication, incremental backup</li>
+<li>Compression</li>
+</ul></li>
+</ol>
+<h3 id="see-also-1">See also</h3>
+<p><a href="https://github.com/restic/others">GitHub - restic/others: Exhaustive list of backup solutions for Linux</a></p>
+<h2 id="security">Security</h2>
+<ul>
+<li>fail2ban</li>
+<li>microvm</li>
+<li>sops</li>
+<li>vault</li>
+<li>authelia</li>
+<li>lldap</li>
+</ul>
+<h2 id="cicd">CI/CD</h2>
+<h2 id="observability">Observability</h2>
+
+
+    </section>
+  </article>
+  
+</body>
+</html>
