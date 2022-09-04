@@ -12,7 +12,7 @@
   <link rel="stylesheet" type="text/css" href="../css/tufte.css">
   <link rel="stylesheet" type="text/css" href="../css/custom.css">
   
-  <title>take all your belongings with you - talks</title>
+  <title>Take All Your Belongings with You - talks</title>
   
 </head>
 <body>
@@ -24,7 +24,7 @@
   <article>
     <section>
       <div class="post_title">
-  <h2 class="post_title"><a href=".././take-all-your-belongings-with-you/">take all your belongings with you</a></h2>
+  <h2 class="post_title"><a href=".././take-all-your-belongings-with-you/">Take All Your Belongings with You</a></h2>
 </div>
 
 <div class="info">
@@ -35,6 +35,7 @@
 
 <div class="toc"><div class="header">Table of Contents</div>
 <ul>
+<li><a href="#introduction">introduction</a></li>
 <li><a href="#why">Why</a>
 <ul>
 <li><a href="#intellectual-humiliation">Intellectual humiliation</a></li>
@@ -107,7 +108,7 @@
 </ul></li>
 <li><a href="#backup">Backup</a>
 <ul>
-<li><a href="#cavets">Cavets</a></li>
+<li><a href="#caveats">Caveats</a></li>
 <li><a href="#file-system-backup">File system backup</a></li>
 <li><a href="#file-system-agnostic-backup">File system agnostic backup</a></li>
 <li><a href="#see-also-1">See also</a></li>
@@ -118,6 +119,15 @@
 </ul></li>
 </ul>
 </div>
+<h1 id="introduction">introduction</h1>
+<p><a href="https://www.vice.com/en/article/pkb4ng/meet-the-self-hosters-taking-back-the-internet-one-server-at-a-time">Meet the Self-Hosters, Taking Back the Internet One Server at a Time</a></p>
+<ul>
+<li>What is self hosting?</li>
+<li>Why I choose to be a self-hoster?</li>
+<li>Is it viable to self host everything?</li>
+<li>Show something that is made possible with self hosting.</li>
+<li>A few selected topics in self-hosting, e.g. remote development, data backup, network security.</li>
+</ul>
 <h1 id="why">Why</h1>
 <h2 id="intellectual-humiliation">Intellectual humiliation</h2>
 <p>They exploit your data, and then take your data as hostage to let they continue their exploiting. A Real world metaphor <a href="https://www.bbc.com/news/world-middle-east-62514631">Lebanon man hailed hero for holding Beirut bank hostage over savings - BBC News</a></p>
@@ -134,16 +144,12 @@
 <p>希望本无所谓有，也无所谓无，这就像地上的路，其实地上本没有路，走的人多了，也便成了路。</p>
 </blockquote>
 <h3 id="the-freedom-to-run-copy-distribute-study-change-and-improve-the-software">The freedom to run, copy, distribute, study, change and improve the software</h3>
-<p>My personal story. I read a lot of articles with <a href="https://getpocket.com/">Pocket</a>. The search function of Pocket works poorly. I frequently find myself unable to recall some articles I saved on pocket. I am pretty excited about Mozilla’s acquisition of pocket, I imagine it would be easier for me to export my data, and auto-label the articles I read on pocket. My wish is like waiting for Godot, it bears no fruits. <a href="https://github.com/Pocket/extension-save-to-pocket/issues/75">Open source Pocket server-side code</a> I want the potential of improving some software I used everyday.</p>
+<p>My personal story. I read a lot of articles with <a href="https://getpocket.com/">Pocket</a>. The search function of Pocket works poorly. I frequently find myself unable to recall some articles I saved on pocket. I am pretty excited about Mozilla’s acquisition of pocket, I imagine it would be easier for me to export my data, and auto-label the articles I read on pocket. My wish is like waiting for Godot, it bears no fruits, cf <a href="https://github.com/Pocket/extension-save-to-pocket/issues/75">Open source Pocket server-side code</a>. I want the potential of improving something I use everyday.</p>
 <h3 id="free-from-fear">Free from fear</h3>
 <ul>
-<li>Imagine one day you wake up to found out your google account is locked.</li>
+<li>Imagine one day you wake up to found out your google account is locked. <a href="https://hn.algolia.com/?dateRange=all&amp;page=0&amp;prefix=true&amp;query=google%20account&amp;sort=byPopularity&amp;type=story">google account Algolia search</a></li>
+<li>What about your wechat account is deactivated? <a href="https://www.tmtpost.com/4661135.html">一男子因微信被封号跳楼自杀，腾讯回应：涉嫌色情骚扰</a></li>
 </ul>
-<p><a href="https://hn.algolia.com/?dateRange=all&amp;page=0&amp;prefix=true&amp;query=google%20account&amp;sort=byPopularity&amp;type=story">google account Algolia search</a></p>
-<ul>
-<li>What about your wechat account is deactivated?</li>
-</ul>
-<p><a href="https://www.tmtpost.com/4661135.html">一男子因微信被封号跳楼自杀，腾讯回应：涉嫌色情骚扰</a></p>
 <h1 id="tenants">Tenants</h1>
 <h2 id="offline-first">Offline first</h2>
 <h3 id="whats-it">What’s it?</h3>
@@ -230,10 +236,7 @@
 <li><p>Coredns</p>
 <p>More magic.</p>
 <ul>
-<li><a href="https://en.wikipedia.org/wiki/Split-horizon_DNS">Split-horizon DNS</a>, i.e. resolving <code>hostname.example.com</code> to <code>hostname.local</code> in LAN, or else resolving it</li>
-</ul>
-<p>to edge proxies.</p>
-<ul>
+<li><a href="https://en.wikipedia.org/wiki/Split-horizon_DNS">Split-horizon DNS</a>, i.e. resolving <code>hostname.example.com</code> to <code>hostname.local</code> in LAN, or else resolving it to edge proxies.</li>
 <li>Wildcard DNS record, i.e. cnaming <code>*.hostname.example.com</code> to <code>hostanme.example.com</code></li>
 </ul></li>
 </ol></li>
@@ -283,7 +286,7 @@
 <li>Supporting access with webdav/sftp etc</li>
 </ul>
 <h2 id="backup">Backup</h2>
-<h3 id="cavets">Cavets</h3>
+<h3 id="caveats">Caveats</h3>
 <p>The <a href="https://en.wikipedia.org/wiki/Time-of-check_to_time-of-use">Time-of-check to time-of-use</a> problem in the case of data backup. An almost harmless example is that the backup software first reads the <code>dirent</code> to get a list of all files, and then it tries to read the file content, now it founds out the file is no longer there. So backing up this file failed. A more pernicious example is that the backup software backs up two inconsistent part of a file, thus results in file corruption. If you want to be absolutely sure about the integerity of the file, you can either let the underlying software so its back up job, or create a file system level snapshot.</p>
 <h3 id="file-system-backup">File system backup</h3>
 <ul>
