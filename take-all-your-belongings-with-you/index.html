@@ -95,6 +95,8 @@
 </ul></li>
 <li><a href="#remote-access">Remote access</a>
 <ul>
+<li><a href="#connectivity">connectivity</a></li>
+<li><a href="#node-discovery">node discovery</a></li>
 <li><a href="#exposing-http-services">exposing http services</a></li>
 <li><a href="#remote-editing">remote editing</a></li>
 <li><a href="#remote-shell-access">remote shell access</a></li>
@@ -208,9 +210,7 @@
 <h3 id="my-take">My take</h3>
 <p>See <a href="https://github.com/contrun/infra/">repo</a>.</p>
 <h2 id="remote-access">Remote access</h2>
-<h3 id="exposing-http-services">exposing http services</h3>
-<ol>
-<li><p>connectivity</p>
+<h3 id="connectivity">connectivity</h3>
 <ol>
 <li><p>DDNS + router port mapping</p>
 <p>Need to dial up with your router, not the fiber optic modem. You may do all the DDNS port mapping work in the router if your router is flexible enough. Or you may run <a href="https://github.com/miniupnp/miniupnp">miniupnp</a> in your server.</p></li>
@@ -228,8 +228,8 @@
 <li>Fallback to relay host when necessary</li>
 <li>Whole network stack available</li>
 </ul></li>
-</ol></li>
-<li><p>node discovery</p>
+</ol>
+<h3 id="node-discovery">node discovery</h3>
 <ol>
 <li><p>MDNS/LLMNR</p>
 <p>Ever wonder how timemachine server on your LAN is discovered, or why you can just ping hostname in Windows? Free lunch if your overlay network supports multicast.</p></li>
@@ -239,13 +239,12 @@
 <li><a href="https://en.wikipedia.org/wiki/Split-horizon_DNS">Split-horizon DNS</a>, i.e. resolving <code>hostname.example.com</code> to <code>hostname.local</code> in LAN, or else resolving it to edge proxies.</li>
 <li>Wildcard DNS record, i.e. cnaming <code>*.hostname.example.com</code> to <code>hostanme.example.com</code></li>
 </ul></li>
-</ol></li>
-<li><p>http routing</p>
+</ol>
+<h3 id="exposing-http-services">exposing http services</h3>
 <p>Dynamic and self organizing.</p>
 <ol>
 <li><p>SSL termination</p></li>
 <li><p>Routing rules</p></li>
-</ol></li>
 </ol>
 <h3 id="remote-editing">remote editing</h3>
 <ul>
