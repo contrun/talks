@@ -214,41 +214,35 @@
 <h1 id="selected-topics">Selected topics</h1>
 <h2 id="remote-access">Remote access</h2>
 <h3 id="connectivity">connectivity</h3>
-<ol>
-<li><p>DDNS + router port mapping</p>
-<p>Need to dial up with your router, not the fiber optic modem. You may do all the DDNS port mapping work in the router if your router is flexible enough. Or you may run <a href="https://github.com/miniupnp/miniupnp">miniupnp</a> in your server.</p></li>
-<li><p>remote port mapping</p>
-<p><a href="https://www.harding.motd.ca/autossh/">autossh</a> (my favorite), <a href="https://ngrok.com/">ngrok</a>, <a href="https://github.com/fatedier/frp">frp</a>, <a href="https://github.com/ehang-io/nps">nps</a>. Not enough if you have a few hosts to manage.</p></li>
-<li><p><a href="https://www.torproject.org/">TOR</a></p>
-<p>With a relay network, but it not so censorship-resistant.</p></li>
-<li><p>Static VPN solutions</p>
-<p>Wireguard is not dynamic enough. O(n) cost for a new host. Manually IPAM (ip addresses management). Not able to penetrate double-NAT.</p></li>
-<li><p>Magic overlay networks</p>
+<h4 id="ddns-router-port-mapping">DDNS + router port mapping</h4>
+<p>Need to dial up with your router, not the fiber optic modem. You may do all the DDNS port mapping work in the router if your router is flexible enough. Or you may run <a href="https://github.com/miniupnp/miniupnp">miniupnp</a> in your server.</p>
+<h4 id="remote-port-mapping">remote port mapping</h4>
+<p><a href="https://www.harding.motd.ca/autossh/">autossh</a> (my favorite), <a href="https://ngrok.com/">ngrok</a>, <a href="https://github.com/fatedier/frp">frp</a>, <a href="https://github.com/ehang-io/nps">nps</a>. Not enough if you have a few hosts to manage.</p>
+<h4 id="tor"><a href="https://www.torproject.org/">TOR</a></h4>
+<p>With a relay network, but it not so censorship-resistant.</p>
+<h4 id="static-vpn-solutions">Static VPN solutions</h4>
+<p>Wireguard is not dynamic enough. O(n) cost for a new host. Manually IPAM (ip addresses management). Not able to penetrate double-NAT.</p>
+<h4 id="magic-overlay-networks">Magic overlay networks</h4>
 <p>All computer science problems can be solved by adding a new layer of indirection. There are many solutions, e.g. <a href="https://github.com/zerotier/ZeroTierOne">zerotier</a>, <a href="https://github.com/tailscale/tailscale">tailscale</a>, <a href="https://github.com/gravitl/netmaker">netmaker</a>, <a href="https://github.com/tonarino/innernet">innernet</a>, <a href="https://github.com/slackhq/nebula">nebula</a>, <a href="https://github.com/juanfont/headscale">headscale</a>, <a href="https://github.com/netbirdio/netbird">netbird</a>, <a href="https://github.com/firezone/firezone">firezone</a>.</p>
 <ul>
 <li>Single sign-on</li>
 <li>Auto hole punching</li>
 <li>Fallback to relay host when necessary</li>
 <li>Whole network stack available</li>
-</ul></li>
-</ol>
+</ul>
 <h3 id="node-discovery">node discovery</h3>
-<ol>
-<li><p>MDNS/LLMNR</p>
-<p>Ever wonder how timemachine server on your LAN is discovered, or why you can just ping hostname in Windows? Free lunch if your overlay network supports multicast.</p></li>
-<li><p>Coredns</p>
+<h4 id="mdnsllmnr">MDNS/LLMNR</h4>
+<p>Ever wonder how timemachine server on your LAN is discovered, or why you can just ping hostname in Windows? Free lunch if your overlay network supports multicast.</p>
+<h4 id="coredns">Coredns</h4>
 <p>More magic.</p>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Split-horizon_DNS">Split-horizon DNS</a>, i.e. resolving <code>hostname.example.com</code> to <code>hostname.local</code> in LAN, or else resolving it to edge proxies.</li>
 <li>Wildcard DNS record, i.e. cnaming <code>*.hostname.example.com</code> to <code>hostanme.example.com</code></li>
-</ul></li>
-</ol>
+</ul>
 <h3 id="exposing-http-services">exposing http services</h3>
 <p>Dynamic and self organizing.</p>
-<ol>
-<li><p>SSL termination</p></li>
-<li><p>Routing rules</p></li>
-</ol>
+<h4 id="ssl-termination">SSL termination</h4>
+<h4 id="routing-rules">Routing rules</h4>
 <h3 id="remote-editing">remote editing</h3>
 <ul>
 <li><a href="https://mosh.org/">mosh</a> + <a href="https://github.com/tmux/tmux/">tmux</a> + <a href="https://neovim.io/">neovim</a></li>
@@ -302,31 +296,29 @@
 <li>Create an archive and forget it. When the back up lags behind current state too much. Create a new backup and overwrite existing one.</li>
 <li>Continuous, incremental back up some directory. Everything the back job runs, the backup software create a snapshot, tries to deduplicate file contents.</li>
 </ul>
-<ol>
-<li><p>tar</p>
+<h4 id="tar">tar</h4>
 <pre class="shell"><code>tar -C &quot;$HOME&quot; --zstd -cpf - --one-file-system --exclude-vcs-ignores --exclude-backups --exclude-caches-all --exclude=&quot;$encrypted_backup_file&quot; &quot;$HOME&quot; | gpg --yes --pinentry-mode loopback --symmetric --cipher-algo aes256 -o &quot;$encrypted_backup_file&quot;
-</code></pre></li>
-<li><p>rclone</p>
+</code></pre>
+<h4 id="rclone">rclone</h4>
 <pre class="shell"><code>rclone sync ~/Sync/ backup-primary-encrypted:/sync/
 cat ~/.config/rclone/rclone.conf
 [backup-primary-encrypted]
 type = crypt
 remote = backup-primary:encrypted
 password = passwordheree
-</code></pre></li>
-<li><p><a href="https://github.com/restic/restic/">restic</a></p>
+</code></pre>
+<h4 id="restic"><a href="https://github.com/restic/restic/">restic</a></h4>
 <ul>
 <li>With all the rclone backends</li>
 <li>Encryption, deduplication, incremental backup</li>
 <li>No compression</li>
-</ul></li>
-<li><p><a href="https://github.com/borgbackup/borg/">borgbackup</a></p>
+</ul>
+<h4 id="borgbackup"><a href="https://github.com/borgbackup/borg/">borgbackup</a></h4>
 <ul>
 <li>Can only back up to host with ssh access, or back up locally</li>
 <li>Encryption, deduplication, incremental backup</li>
 <li>Compression</li>
-</ul></li>
-</ol>
+</ul>
 <h3 id="see-also-1">See also</h3>
 <p><a href="https://github.com/restic/others">GitHub - restic/others: Exhaustive list of backup solutions for Linux</a></p>
 <h2 id="service-provision">Service provision</h2>
