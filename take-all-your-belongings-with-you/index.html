@@ -301,7 +301,7 @@
 </ul>
 <ol>
 <li><p>tar</p>
-<pre class="shell"><code>tar -C &quot;$HOME&quot; -cpaf - --one-file-system --exclude-vcs-ignores --exclude-backups --exclude-caches-all --exclude=&quot;$encrypted_backup_file&quot; &quot;$HOME&quot; | gpg --yes --pinentry-mode loopback --symmetric --cipher-algo aes256 -o &quot;$encrypted_backup_file&quot;
+<pre class="shell"><code>tar -C &quot;$HOME&quot; --zstd -cpf - --one-file-system --exclude-vcs-ignores --exclude-backups --exclude-caches-all --exclude=&quot;$encrypted_backup_file&quot; &quot;$HOME&quot; | gpg --yes --pinentry-mode loopback --symmetric --cipher-algo aes256 -o &quot;$encrypted_backup_file&quot;
 </code></pre></li>
 <li><p>rclone</p>
 <pre class="shell"><code>rclone sync ~/Sync/ backup-primary-encrypted:/sync/
