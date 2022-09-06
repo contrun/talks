@@ -12,8 +12,10 @@
 + A few selected topics in self-hosting, e.g. remote development, data backup, network security.
 
 * Why
-** I want my things back
-TOOD: add a meme
+** I want my data back
+
+[[../pictures/i-want-my-money-back.jpg]]
+
 It is an intellectual humiliation to not be able to take my things back. [[https://ruben.verborgh.org/facebook/][Getting my personal data out of Facebook | Ruben Verborgh]].
 Doubly so when they exploit your data, and then take your data as hostage to let they continue their exploiting.
 
@@ -26,18 +28,26 @@ Just having the possibility is exulting.
 #+end_quote
 
 *** Free from want
+
+[[../pictures/expanding-storage.png]]
+
 + [[https://en.wikipedia.org/wiki/Digital_hoarding][Digital hoarding]]
 + [[https://www.reddit.com/r/DataHoarder/][/r/DataHoarder/]]
 
 *** Free from fear
-TODO: Add a meme
+
+[[../pictures/google-graveyard.png]]
+
 + [[https://killedbygoogle.com/][Google Graveyard - Killed by Google]]
-+ 有得忙了
++ [[https://fortune.com/2022/07/08/china-shanghai-data-leak-government-surveillance-inevitable/][The Shanghai data leak shows China's state surveillance is expanding too fast to handle | Fortune]]
 + Imagine one day you wake up to found out your google account is locked. [[https://hn.algolia.com/?dateRange=all&page=0&prefix=true&query=google%20account&sort=byPopularity&type=story][google account Algolia search]]
 + What about your wechat account is deactivated? [[https://www.tmtpost.com/4661135.html][一男子因微信被封号跳楼自杀，腾讯回应：涉嫌色情骚扰]]
 
 *** The freedom to run, copy, distribute, study, change and improve the software
-My personal story.
+Kind of raison d'etre.
+
+[[../pictures/perfect-meme.jpg]]
+
 I read a lot of articles with [[https://getpocket.com/][Pocket]]. The search function of Pocket works poorly. I frequently find myself unable to recall some articles I saved on pocket.
 I am pretty excited about Mozilla's acquisition of pocket,
 I imagine it would be easier for me to export my data, and auto-label the articles I read on pocket.
@@ -52,6 +62,9 @@ An unexamined life is not worth living, aka did you update your Facebook status 
 + [[https://calebschoepp.com/blog/2022/productivity-porn/][Productivity Porn - Caleb Schoepp]]
 
 * Tenets
+
+[[../pictures/commandments.jpg]]
+
 ** Offline first
 *** What's it?
 [[https://offlinefirst.org/][Offline First]]
@@ -88,25 +101,49 @@ Take [[https://github.com/ellie/atuin][atuin]] as an example.
 + [[https://personium.io/en/index.html][Personium | Open Source PDS Software]]
 
 * Show case
-TODO: add a meme
+
+[[../pictures/screenshot-2022-09-07-00-57-13.png]]
+
+[[../pictures/screenshot-2022-09-05-19-54-12.png]]
+
+** [[https://github.com/coder/code-server][code-server]]
+
+[[../pictures/screenshot-2022-09-05-23-18-27.png]]
+
+Edit files with your favrioute editor, but on the web and with all your files.
 ** [[https://github.com/janeczku/calibre-web][calibre web]]
+
+[[../pictures/screenshot-2022-09-07-01-23-49.png]]
+
 Show how large my personal digital libraray is, and why it can't be done with a public service. This also applies to your music/video library.
+
 ** [[https://github.com/simonw/datasette][datasette]]
+
+[[../pictures/screenshot-2022-09-07-01-21-07.png]]
+
 Explore my pocket data with datasette. Also mention powerful bussiness intelligence tools in the context of personal data.
+
 ** [[https://github.com/NorfairKing/smos][smos]]
 Show how amazing is smos a productivity tool, and how c
 ** [[https://github.com/200ok-ch/organice][organice]]
 Indicate why I am inifinitely more productive with my emacs config, and how I can choose my own tools.
 ** [[https://github.com/keeweb/keeweb][keeweb]]
+
+[[../pictures/screenshot-2022-09-05-23-26-44.png]]
+
 Store everything I have on the Internet without fear.
 ** [[https://github.com/aria2/aria2][aria2]]
 Download things from the office, use it when arriving home.
 ** [[https://github.com/grocy/grocy][grocy]]
+
+[[../pictures/screenshot-2022-09-05-23-38-44.png]]
+
 What can you make with all the materials in your refrigerator?
 ** [[https://github.com/rclone/rclone][rclone]]/[[https://github.com/drakkan/sftpgo][sftpgo]]
+
+[[../pictures/screenshot-2022-09-05-23-37-12.png]]
+
 Mount remote storage, and expose them in a standarized interface.
-** [[https://github.com/coder/code-server][code-server]]
-Edit files with your favrioute editor, but on the web and with all your files.
 
 * Selected topics
 ** Remote access
@@ -157,6 +194,7 @@ Dynamic and self organizing.
 + [[https://www.jetbrains.com/fleet/][jetbrains fleet]]
 + [[https://jupyter.org/][jupyter lab]]
 + [[https://www.eclipse.org/che/][eclipse che]]
++ [[https://www.gitpod.io/][Gitpod]]
 
 *** remote shell access
 + ssh ProxyJump
