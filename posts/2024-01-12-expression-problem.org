@@ -1,0 +1,526 @@
+#+TITLE: expression problem
+#+DATE: Fri, 12 Jan 2024 11:14:53 +0800
+#+SLUG: expression-problem
+
+# 现代计算机程序语言的巨头之一 Niklaus Wirth 有一本传世名著 Algorithms + Data Structures = Programs。本次 tea hour 将探讨程序语言在扩展数据结构和算法方面的表达能力。The Open/Closed Principle 说软件对象应该对扩展是开放的，但是对于修改是封闭的。有趣的是，函数式编程和面向对象编程这两种编程范式对算法和数据结构的开放性和封闭性正好想法。面向对象编程语言可以让我们很容易地给现有算法增加数据结构，我们只需要继承某个定义好的类；而函数式编程语言可以让我们很容易地给现有数据结构增加算法，我们只需要定义新的函数。遗憾的是，这两种编程范式都不能很好地在不修改现有代码和不使用动态类型反射的前提下同时扩展现有数据结构和算法。expression problem 描述的正是这个困境。我们将会介绍几个程序语言是如何解决这个难题的。
+
+# 考虑下面的具体例子可以让我们更容易地从直观上理解 expression problem。假设我们的代码库里面有一个用于计算三角形周长的模块，我们现在要扩展这个模块。我们想要把数据结构扩展到其他的平面图形，比如正方形；我们还想要把算法扩展到其他的几何公式，比如说面积。但是处于种种原因，我们不希望修改这个模块的任何代码。大家可以考虑一下，怎么样用自己熟悉的编程语言（比如 rust 和 java）做到这件事情。我们会发现，面向对象编程语言如 java 可以很容易地增加正方形到平面图形类里面，而函数式编程语言如 rust 可以很容易地增加面积算法。但是两者都不能很轻易地既扩展数据类型又扩展算法。如果你发现你可以很轻易地用某个语言同时实现这两件事情，那么我确信，第一这个语言的表达能力很强，第二你对这个语言的理解很深。
+
+* References
+- [[https://en.wikipedia.org/wiki/Expression_problem][Expression problem - Wikipedia]]
+
+- [[https://gist.github.com/chrisdone/7e07b3a90474542c9d1ebef033c1ee6e#file-expression_problem-hs-L6][Solving the Expression Problem with Haskell · GitHub]]
+
+- [[https://langdev.stackexchange.com/questions/1402/how-do-you-solve-expression-problem-in-your-language-design][syntax - How do you solve Expression Problem in your language design? - Programming Language Design and Implementation Stack Exchange]]
+
+- [[https://www.youtube.com/watch?v=FWW87fvBKJg][Dr. Ralf Laemmel Advanced FP - The Expression Problem - YouTube]]
+
+- [[https://stackoverflow.com/questions/3596366/what-is-the-expression-problem][programming languages - What is the 'expression problem'? - Stack Overflow]]
+
+- [[https://max.computer/blog/solving-the-expression-problem-in-clojure/][Max.Computer - Solving the Expression Problem in Clojure]]
+
+- [[https://eli.thegreenplace.net/2016/the-expression-problem-and-its-solutions/][The Expression Problem and its solutions - Eli Bendersky's website]]
+
+- [[https://eli.thegreenplace.net/2018/more-thoughts-on-the-expression-problem-in-haskell/][More thoughts on the Expression Problem in Haskell - Eli Bendersky's website]]
+
+* The intrinsic tension between extending data types and operations of data types
+
+Algorithms + Data Structures = Programs
+
+[[https://en.wikipedia.org/wiki/Open%E2%80%93closed_principle][Open–closed principle]]
+
+#+begin_quote
+Software entities should be open for extension, but closed for modification.
+#+end_quote
+
+** Operations are open for extension, but data types are closed for modification (aka functional programming)
+
+#+begin_src rust
+  pub enum PlaneShape {
+      Triangle(f64, f64, f64),
+  }
+
+  fn perimeter(shape: PlaneShape) -> f64 {
+      match shape {
+          PlaneShape::Triangle(a, b, c) => a + b + c,
+      }
+  }
+
+  // Adding operations to existing data.
+  fn area(shape: PlaneShape) -> f64 {
+      match shape {
+          PlaneShape::Triangle(a, b, c) => {
+              let s = (a + b + c) / 2.0;
+              (s * (s - a) * (s - b) * (s - c)).sqrt()
+          },
+      }
+  }
+
+  // Now what if I want to add a Square(x: f64) to PlaneShape.
+  // I will need to change algebraic sum PlaneShape to
+  pub enum PlaneShape {
+      Triangle(f64, f64, f64),
+      Square(f64),
+  }
+  // But in this way, functions perimeter and area does not work any more.
+  // as the pattern match is now in-exhaustive.
+#+end_src
+
+** Data types are open for extension, but operations are closed for modification (aka object-oriented programming)
+
+#+begin_src java
+  public abstract class PlaneShape {
+      public abstract double perimeter();
+  }
+
+  public class Triangle extends PlaneShape {
+      private double a, b, c;
+
+      public Triangle(double a, double b, double c) {
+          this.a = a;
+          this.b = b;
+          this.c = c;
+      }
+
+      @Override
+      public double perimeter() {
+          return a + b + c;
+      }
+  }
+
+  // Adding data to existing operations
+  public class Square extends PlaneShape {
+      private double x;
+
+      public Square(double x) {
+          this.x = x;
+      }
+
+      @Override
+      public double perimeter() {
+          return 4 * x;
+      }
+  }
+
+  // Now what if I want to add a area function to PlaneShape.
+  // Of cause, I need to change the parent class PlaneShape to
+  public abstract class PlaneShape {
+      public abstract double perimeter();
+      public abstract double area();
+  }
+  // Now subclasses Triangle and Square does not work anymore,
+  // as they do not implement method area.
+#+end_src
+
+
+* Solving expression problem with rust
+
+** Make PlaneShape open to extension
+
+#+begin_src rust
+  trait PlaneShape {  }
+
+  struct Triangle(f64, f64, f64),
+
+  struct Square(f64);
+
+  impl PlaneShape for Triangle {}
+
+  impl PlaneShape for Square {}
+
+  fn perimeter(shape: dyn PlaneShape) -> f64 {
+      unimplemented!("Now how do we pattern match a trait?");
+  }
+#+end_src
+
+** Implementing a perimeter function based on a abstract type ~dyn PlaneShape~?
+
+#+begin_src rust
+  fn perimeter(shape: dyn PlaneShape) -> f64 {
+      unimplemented!("Now how do we pattern match a trait?")?
+  }
+#+end_src
+
+We now have a problem. How do we define perimeter based on a dynamic trait ~PlaneShape~.
+If it is a concrete type called ~Triangle~, this problem is simple.
+If it is a concrete type called ~Square~, this problem is also simple.
+The problem is that we don't know what this ~PlaneShape~ is exactly.
+We need some sort of patter match as in
+
+#+begin_src rust
+  match shape {
+      Triangle(a, b, c) => (a+b+c),
+      Square(x) => 4*x,
+  }
+#+end_src
+
+It is a whack-a-mole game. We can extend PlaneShape to support new data types now, but we lost our ability to pattern matching on PlaneShapes, which is required to implement new operations.
+
+Not all hope has lost. In fact, you may have solved this problem yourself. You just don't know the computer scientist in yourself.
+
+I will detour through haskell to let you have a better self-reflection (you are indeed a computer scientist who is good at solving this kind of foundamental problems).
+
+** Type classes in haskell
+
+A well known solution for the expression problem is haskell's type classes (not coincidentally, the formulization of expression problem and the invention of type classes are both, to a large extent, contributed by [[https://en.wikipedia.org/wiki/Philip_Wadler][Philip L. Wadler]]).
+
+*** Type classes vs traits
+
+#+begin_src haskell
+class Areable shape where
+  -- calculates the shape's area
+  area :: shape -> Double
+#+end_src
+
+#+begin_src rust
+  trait Areable {
+      fn area(&self) -> f64;
+  }
+#+end_src
+
+*** Type classes > traits
+
+#+begin_src haskell
+-- Create a data type Triangle with one operation perimeter
+data Triangle = Triangle { a :: Double, b :: Double, c :: Double }
+
+class Perimeterable shape where
+  -- calculates the perimeter of the shape
+  perimeter :: shape -> Double
+
+instance Perimeterable Triangle where
+  perimeter Triangle {a,b,c} = a + b + c
+
+-- Add an operation
+
+class Areable shape where
+  -- calculates the shape's area
+  area :: shape -> Double
+
+instance Areable Triangle where
+  -- use Heron's formula to calculate area
+  area Triangle {a, b, c} =
+    let s = (a + b + c) / 2
+    in sqrt (s * (s - a) * (s - b) * (s - c))
+
+-- Add a data type
+
+data Square = Square { x :: Double }
+
+-- Implement the new operation for the new type
+
+instance Perimeterable Square where
+  perimeter Square {x} = x * 4
+
+instance Areable Square where
+  area Square {x} = x * x
+#+end_src
+
+Actually, this only solve part of the problem, see [[https://eli.thegreenplace.net/2018/more-thoughts-on-the-expression-problem-in-haskell/][More thoughts on the Expression Problem in Haskell]] for the fault (warning, the rabbit hole is deep).
+
+*** Type classes vs traits again
+
+The crucial thing is
+
+#+begin_src haskell
+class Perimeterable shape where
+  perimeter :: shape -> Double
+
+instance Perimeterable Triangle where
+  perimeter Triangle {a,b,c} = a + b + c
+#+end_src
+
+Note that to instantiate ~Triangle~ as a ~Perimeterable~, we passed the type ~Triangle~ to the function ~perimeter~, this means that
+we can acutally use the type information and pattern matching to caculate perimeter. This is how we implement ~fn perimeter(shape: dyn PlaneShape) -> f64~
+with explicit type information.
+
+*** The missing piece in a rust lego
+
+Now, let's look into rust. Pedagogically we need
+
+#+begin_src rust
+  fn perimeter(shape: dyn PlaneShape) -> f64 {
+      unimplemented!("Now how do we pattern match a trait?")?
+  }
+
+  // This still does not work as we need the concrete PlaneShape type to calculate perimeter, i.e. we need the next function
+  fn perimeter<X: PlaneShape>(shape: X) -> f64 { }
+
+  // But this is not a generic function. It has been monomorphizated, and is nothing more than next function.
+  fn perimeter<Triangle: PlaneShape>(shape: Triangle) -> f64 {
+      match shape {
+          Triangle(a, b, c) => (a+b+c),
+      }
+  }
+
+  // This is of no use as what we want is to extend the definition of perimeter to other PlaneShapes.
+  fn perimeter(shape: Triangle) -> f64 {
+      match shape {
+          Triangle(a, b, c) => (a+b+c),
+      }
+  }
+#+end_src
+
+** Some solutions for rust
+
+So how do we pass a concrete type to a abstract trait? There are serveral ways to do that.
+
+#+begin_src rust
+  trait PlaneShape {}
+
+  struct Triangle {
+      a: f64,
+      b: f64,
+      c: f64,
+  }
+
+  impl PlaneShape for Triangle {}
+
+  // I will implement only the method ~perimeter~ for one type data ~Triangle~ below,
+  // as it should be evident on how to extend both methods and data types.
+#+end_src
+
+*** Associated type for traits
+#+begin_src rust
+  // Solution 1: Associated type
+  trait PerimeterableAT {
+      type S: PlaneShape;
+      fn perimeter(shape: Self::S) -> f64;
+  }
+
+  impl PerimeterableAT for Triangle {
+      type S = Triangle;
+      fn perimeter(shape: Self::S) -> f64 {
+          shape.a + shape.b + shape.c
+      }
+  }
+#+end_src
+
+*** Bounded generics for traits
+
+#+begin_src rust
+  // Solution 2: Bounded generics for traits
+  trait PerimeterableBG<S> where S: PlaneShape {
+      fn perimeter(shape: S) -> f64;
+  }
+
+  impl PerimeterableBG<Triangle> for Triangle {
+      fn perimeter(shape: Triangle) -> f64 {
+          shape.a + shape.b + shape.c
+      }
+  }
+#+end_src
+
+*** Generics for structs
+
+#+begin_src rust
+  // Solution 3: Bounded generics for structs
+  use std::marker::PhantomData;
+
+  struct PerimeterablePT<T> where T: PlaneShape {
+      _unused: PhantomData<T>,
+  }
+
+  impl PerimeterablePT<Triangle> {
+      fn perimeter(shape: Triangle) -> f64 {
+          shape.a + shape.b + shape.c
+      }
+  }
+#+end_src
+
+** A simpler solution for rust
+
+Yes, all above solutions are complicated and awkward.
+
+And you are being deliberately led away from a simpler solution.
+
+For a good reason.
+
+*** explicitly typed self references
+
+#+begin_src rust
+  trait PlaneShape {  }
+
+  struct Triangle {
+      a: f64,
+      b: f64,
+      c: f64,
+  }
+
+  impl PlaneShape for Triangle {}
+
+  trait Perimeterable {
+      fn perimeter(&self) -> f64;
+  }
+
+  impl Perimeterable for Triangle {
+      fn perimeter(&self) -> f64 {
+          self.a + self.b + self.c
+      }
+  }
+#+end_src
+
+This is what is called explicitly typed self references, without which, the following code to extract data in a specific type would be impossible.
+
+#+begin_src rust
+  self.a + self.b + self.c
+#+end_src
+
+~self.a~ implies that you are using the concrete type ~Triangle~ which implements the abstract trait ~Perimeterable~.
+
+Many programming languages do not have the functionality to refer to a ~Self~ type in traits.
+
+* Another side of the coin (solving expression problem for OOP languages)
+
+** Remove methods from `PlaneShape`
+
+The first thing is to remove all the methods from PlaneShape, otherwise we can't extend new methods without modify the defintion of PlaneShape.
+
+#+begin_src java
+  public abstract class PlaneShape { }
+#+end_src
+
+** Define new functions on a `PlaneShape` with nothing in it (or the visitor pattern)
+
+Chapter Visitor of the book ~Design Patterns: Elements of Reusable Object-Oriented Software~
+
+#+begin_quote
+Intent: Represent an operation to be performed on the elements of an object structure. Visitor lets you define a new operation without changing the classes of the elements on which it operates.
+#+end_quote
+
+*** Making oop more fp
+
+#+begin_src java
+public abstract class PlaneShape {
+    public abstract void accept(PlaneShapeVisitor visitor);
+}
+
+public class Triangle extends PlaneShape {
+    private double a, b, c;
+
+    public Triangle(double a, double b, double c) {
+        this.a = a;
+        this.b = b;
+        this.c = c;
+    }
+
+    @Override
+    public void accept(PlaneShapeVisitor visitor) {
+        visitor.visitTriangle(this);
+    }
+}
+
+public class Square extends PlaneShape {
+    private double x;
+
+    public Square(double x) {
+        this.x = x;
+    }
+
+    @Override
+    public void accept(PlaneShapeVisitor visitor) {
+        visitor.visitSquare(this);
+    }
+}
+
+public interface PlaneShapeVisitor {
+    void visitTriangle(Triangle triangle);
+    void visitSquare(Square square);
+}
+
+public class PerimeterVisitor implements PlaneShapeVisitor {
+    private double value;
+
+    public double getValue() {
+        return value;
+    }
+
+    @Override
+    public void visitTriangle(Triangle triangle) {
+        double a = triangle.a;
+        double b = triangle.b;
+        double c = triangle.c;
+        value = a + b + c;
+    }
+
+    @Override
+    public void visitSquare(Square square) {
+        double x = square.x;
+        value = 4 * x;
+    }
+}
+#+end_src
+
+*** Try fp
+
+Now we are able to write
+
+#+begin_src java
+Triangle triangle = new Triangle(3, 4, 5);
+Square square = new Square(2);
+
+PerimeterVisitor visitor = new PerimeterVisitor();
+triangle.accept(visitor);
+double trianglePerimeter = visitor.getValue(); // 12.0
+
+visitor = new PerimeterVisitor();
+square.accept(visitor);
+double squarePerimeter = visitor.getValue(); // 8.0
+#+end_src
+
+** Make visitors generic
+*** Flipping to the other side of the coin
+Using visitor pattern actually does not solve the problem. It's only turning a problem of extending operators into a problem of extending data types.
+
+#+begin_src java
+public interface PlaneShapeVisitor {
+    void visitTriangle(Triangle triangle);
+    void visitSquare(Square square);
+}
+#+end_src
+
+Here we hardcoded 2 ~PlaneShape~ ~Triangle~ and ~Square~, but we need to accept any ~PlaneShape~. How can we visit any generic ~PlaneShape~? i.e. how to do this?
+
+#+begin_src java
+public interface PlaneShapeVisitor<T extends PlaneShape> {
+    void visit<T>(T shape);
+}
+#+end_src
+
+*** Solution
+The above problem is reminiscent of our rust journey to expression problem. We need to some how inject a concrete type ~PlaneShape~ into ~visit~ function.
+
+* More methods
+
+# From  [[https://www.youtube.com/watch?v=FWW87fvBKJg][Dr. Ralf Laemmel Advanced FP - The Expression Problem - YouTube]], below methods are non-solutions
+# * Visitor pattern
+
+# * Partial function
+
+# #+begin_src scala
+# trait PlaneShape
+
+# case class Triangle(a: Double, b: Double, c: Double) extends PlaneShape
+
+# def perimeter(shape: PlaneShape): Double = shape match {
+#   case Triangle(a, b, c) => a + b + c
+# }
+
+# def area(shape: PlaneShape): Double = shape match {
+#   case Triangle(a, b, c) =>
+#     val s = (a + b + c) / 2
+#     Math.sqrt(s * (s - a) * (s - b) * (s - c))
+# }
+# #+end_src
+
+# * partial class
+
+# * cast based type switch
+
+# * extension methods
+
+** multiple dispatch
+
+The crux of the problem. Add a new method and dispatch this method one different types (these types are not predefined, we can add a new type as we wish).
+
+** scala
