@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  
+  <link rel="stylesheet" href="../vendor/katex/katex.min.css">
+<script defer type="text/javascript" src="../vendor/katex/katex.min.js"></script>
+<script defer type="text/javascript" src="../vendor/katex/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+  
+  <link rel="stylesheet" type="text/css" href="../css/syntax.css">
+  <link rel="stylesheet" type="text/css" href="../css/tufte.css">
+  <link rel="stylesheet" type="text/css" href="../css/custom.css">
+  
+  <title>expression problem - talks</title>
+  
+</head>
+<body>
+        <nav class="group">
+          <a href="../">home</a>
+          <a href="https://github.com/contrun/talks/">github</a>
+      </nav>
+
+  <article>
+    <section>
+      <div class="post_title">
+  <h2 class="post_title"><a href=".././expression-problem/">expression problem</a></h2>
+</div>
+
+<div class="info">
+    Posted on January 12, 2024
+    
+</div>
+
+
+<div class="toc"><div class="header">Table of Contents</div>
+<ul>
+<li><a href="#references">References</a></li>
+<li><a href="#the-intrinsic-tension-between-extending-data-types-and-operations-of-data-types">The intrinsic tension between extending data types and operations of data types</a>
+<ul>
+<li><a href="#operations-are-open-for-extension-but-data-types-are-closed-for-modification-aka-functional-programming">Operations are open for extension, but data types are closed for modification (aka functional programming)</a></li>
+<li><a href="#data-types-are-open-for-extension-but-operations-are-closed-for-modification-aka-object-oriented-programming">Data types are open for extension, but operations are closed for modification (aka object-oriented programming)</a></li>
+</ul></li>
+<li><a href="#solving-expression-problem-with-rust">Solving expression problem with rust</a>
+<ul>
+<li><a href="#make-planeshape-open-to-extension">Make PlaneShape open to extension</a></li>
+<li><a href="#implementing-a-perimeter-function-based-on-a-abstract-type-dyn-planeshape">Implementing a perimeter function based on a abstract type <code>dyn PlaneShape</code>?</a></li>
+<li><a href="#type-classes-in-haskell">Type classes in haskell</a>
+<ul>
+<li><a href="#type-classes-vs-traits">Type classes vs traits</a></li>
+<li><a href="#type-classes-traits">Type classes &gt; traits</a></li>
+<li><a href="#type-classes-vs-traits-again">Type classes vs traits again</a></li>
+<li><a href="#the-missing-piece-in-a-rust-lego">The missing piece in a rust lego</a></li>
+</ul></li>
+<li><a href="#some-solutions-for-rust">Some solutions for rust</a>
+<ul>
+<li><a href="#associated-type-for-traits">Associated type for traits</a></li>
+<li><a href="#bounded-generics-for-traits">Bounded generics for traits</a></li>
+<li><a href="#generics-for-structs">Generics for structs</a></li>
+</ul></li>
+<li><a href="#a-simpler-solution-for-rust">A simpler solution for rust</a>
+<ul>
+<li><a href="#explicitly-typed-self-references">explicitly typed self references</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#another-side-of-the-coin-solving-expression-problem-for-oop-languages">Another side of the coin (solving expression problem for OOP languages)</a>
+<ul>
+<li><a href="#remove-methods-from-planeshape">Remove methods from `PlaneShape`</a></li>
+<li><a href="#define-new-functions-on-a-planeshape-with-nothing-in-it-or-the-visitor-pattern">Define new functions on a `PlaneShape` with nothing in it (or the visitor pattern)</a>
+<ul>
+<li><a href="#making-oop-more-fp">Making oop more fp</a></li>
+<li><a href="#try-fp">Try fp</a></li>
+</ul></li>
+<li><a href="#make-visitors-generic">Make visitors generic</a>
+<ul>
+<li><a href="#flipping-to-the-other-side-of-the-coin">Flipping to the other side of the coin</a></li>
+<li><a href="#solution">Solution</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#more-methods">More methods</a>
+<ul>
+<li><a href="#multiple-dispatch">multiple dispatch</a></li>
+<li><a href="#scala">scala</a></li>
+</ul></li>
+</ul>
+</div>
+<h1 id="references">References</h1>
+<ul>
+<li><p><a href="https://en.wikipedia.org/wiki/Expression_problem">Expression problem - Wikipedia</a></p></li>
+<li><p><a href="https://gist.github.com/chrisdone/7e07b3a90474542c9d1ebef033c1ee6e#file-expression_problem-hs-L6">Solving the Expression Problem with Haskell · GitHub</a></p></li>
+<li><p><a href="https://langdev.stackexchange.com/questions/1402/how-do-you-solve-expression-problem-in-your-language-design">syntax - How do you solve Expression Problem in your language design? - Programming Language Design and Implementation Stack Exchange</a></p></li>
+<li><p><a href="https://www.youtube.com/watch?v=FWW87fvBKJg">Dr. Ralf Laemmel Advanced FP - The Expression Problem - YouTube</a></p></li>
+<li><p><a href="https://stackoverflow.com/questions/3596366/what-is-the-expression-problem">programming languages - What is the ‘expression problem’? - Stack Overflow</a></p></li>
+<li><p><a href="https://max.computer/blog/solving-the-expression-problem-in-clojure/">Max.Computer - Solving the Expression Problem in Clojure</a></p></li>
+<li><p><a href="https://eli.thegreenplace.net/2016/the-expression-problem-and-its-solutions/">The Expression Problem and its solutions - Eli Bendersky’s website</a></p></li>
+<li><p><a href="https://eli.thegreenplace.net/2018/more-thoughts-on-the-expression-problem-in-haskell/">More thoughts on the Expression Problem in Haskell - Eli Bendersky’s website</a></p></li>
+</ul>
+<h1 id="the-intrinsic-tension-between-extending-data-types-and-operations-of-data-types">The intrinsic tension between extending data types and operations of data types</h1>
+<p>Algorithms + Data Structures = Programs</p>
+<p><a href="https://en.wikipedia.org/wiki/Open%E2%80%93closed_principle">Open–closed principle</a></p>
+<blockquote>
+<p>Software entities should be open for extension, but closed for modification.</p>
+</blockquote>
+<h2 id="operations-are-open-for-extension-but-data-types-are-closed-for-modification-aka-functional-programming">Operations are open for extension, but data types are closed for modification (aka functional programming)</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">pub</span> <span class="kw">enum</span> PlaneShape <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>    Triangle(<span class="dt">f64</span><span class="op">,</span> <span class="dt">f64</span><span class="op">,</span> <span class="dt">f64</span>)<span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="op">}</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="kw">fn</span> perimeter(shape<span class="op">:</span> PlaneShape) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a>    <span class="kw">match</span> shape <span class="op">{</span></span>
+<span id="cb1-7"><a href="#cb1-7"></a>        <span class="pp">PlaneShape::</span>Triangle(a<span class="op">,</span> b<span class="op">,</span> c) <span class="op">=&gt;</span> a <span class="op">+</span> b <span class="op">+</span> c<span class="op">,</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a>    <span class="op">}</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="op">}</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a></span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="co">// Adding operations to existing data.</span></span>
+<span id="cb1-12"><a href="#cb1-12"></a><span class="kw">fn</span> area(shape<span class="op">:</span> PlaneShape) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb1-13"><a href="#cb1-13"></a>    <span class="kw">match</span> shape <span class="op">{</span></span>
+<span id="cb1-14"><a href="#cb1-14"></a>        <span class="pp">PlaneShape::</span>Triangle(a<span class="op">,</span> b<span class="op">,</span> c) <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb1-15"><a href="#cb1-15"></a>            <span class="kw">let</span> s <span class="op">=</span> (a <span class="op">+</span> b <span class="op">+</span> c) <span class="op">/</span> <span class="dv">2.0</span><span class="op">;</span></span>
+<span id="cb1-16"><a href="#cb1-16"></a>            (s <span class="op">*</span> (s <span class="op">-</span> a) <span class="op">*</span> (s <span class="op">-</span> b) <span class="op">*</span> (s <span class="op">-</span> c))<span class="op">.</span>sqrt()</span>
+<span id="cb1-17"><a href="#cb1-17"></a>        <span class="op">},</span></span>
+<span id="cb1-18"><a href="#cb1-18"></a>    <span class="op">}</span></span>
+<span id="cb1-19"><a href="#cb1-19"></a><span class="op">}</span></span>
+<span id="cb1-20"><a href="#cb1-20"></a></span>
+<span id="cb1-21"><a href="#cb1-21"></a><span class="co">// Now what if I want to add a Square(x: f64) to PlaneShape.</span></span>
+<span id="cb1-22"><a href="#cb1-22"></a><span class="co">// I will need to change algebraic sum PlaneShape to</span></span>
+<span id="cb1-23"><a href="#cb1-23"></a><span class="kw">pub</span> <span class="kw">enum</span> PlaneShape <span class="op">{</span></span>
+<span id="cb1-24"><a href="#cb1-24"></a>    Triangle(<span class="dt">f64</span><span class="op">,</span> <span class="dt">f64</span><span class="op">,</span> <span class="dt">f64</span>)<span class="op">,</span></span>
+<span id="cb1-25"><a href="#cb1-25"></a>    Square(<span class="dt">f64</span>)<span class="op">,</span></span>
+<span id="cb1-26"><a href="#cb1-26"></a><span class="op">}</span></span>
+<span id="cb1-27"><a href="#cb1-27"></a><span class="co">// But in this way, functions perimeter and area does not work any more.</span></span>
+<span id="cb1-28"><a href="#cb1-28"></a><span class="co">// as the pattern match is now in-exhaustive.</span></span></code></pre></div>
+<h2 id="data-types-are-open-for-extension-but-operations-are-closed-for-modification-aka-object-oriented-programming">Data types are open for extension, but operations are closed for modification (aka object-oriented programming)</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">public</span> <span class="kw">abstract</span> <span class="kw">class</span> PlaneShape {</span>
+<span id="cb2-2"><a href="#cb2-2"></a>    <span class="kw">public</span> <span class="kw">abstract</span> <span class="dt">double</span> <span class="fu">perimeter</span>();</span>
+<span id="cb2-3"><a href="#cb2-3"></a>}</span>
+<span id="cb2-4"><a href="#cb2-4"></a></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="kw">public</span> <span class="kw">class</span> Triangle <span class="kw">extends</span> PlaneShape {</span>
+<span id="cb2-6"><a href="#cb2-6"></a>    <span class="kw">private</span> <span class="dt">double</span> a, b, c;</span>
+<span id="cb2-7"><a href="#cb2-7"></a></span>
+<span id="cb2-8"><a href="#cb2-8"></a>    <span class="kw">public</span> <span class="fu">Triangle</span>(<span class="dt">double</span> a, <span class="dt">double</span> b, <span class="dt">double</span> c) {</span>
+<span id="cb2-9"><a href="#cb2-9"></a>        <span class="kw">this</span>.<span class="fu">a</span> = a;</span>
+<span id="cb2-10"><a href="#cb2-10"></a>        <span class="kw">this</span>.<span class="fu">b</span> = b;</span>
+<span id="cb2-11"><a href="#cb2-11"></a>        <span class="kw">this</span>.<span class="fu">c</span> = c;</span>
+<span id="cb2-12"><a href="#cb2-12"></a>    }</span>
+<span id="cb2-13"><a href="#cb2-13"></a></span>
+<span id="cb2-14"><a href="#cb2-14"></a>    <span class="at">@Override</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a>    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">perimeter</span>() {</span>
+<span id="cb2-16"><a href="#cb2-16"></a>        <span class="kw">return</span> a + b + c;</span>
+<span id="cb2-17"><a href="#cb2-17"></a>    }</span>
+<span id="cb2-18"><a href="#cb2-18"></a>}</span>
+<span id="cb2-19"><a href="#cb2-19"></a></span>
+<span id="cb2-20"><a href="#cb2-20"></a><span class="co">// Adding data to existing operations</span></span>
+<span id="cb2-21"><a href="#cb2-21"></a><span class="kw">public</span> <span class="kw">class</span> Square <span class="kw">extends</span> PlaneShape {</span>
+<span id="cb2-22"><a href="#cb2-22"></a>    <span class="kw">private</span> <span class="dt">double</span> x;</span>
+<span id="cb2-23"><a href="#cb2-23"></a></span>
+<span id="cb2-24"><a href="#cb2-24"></a>    <span class="kw">public</span> <span class="fu">Square</span>(<span class="dt">double</span> x) {</span>
+<span id="cb2-25"><a href="#cb2-25"></a>        <span class="kw">this</span>.<span class="fu">x</span> = x;</span>
+<span id="cb2-26"><a href="#cb2-26"></a>    }</span>
+<span id="cb2-27"><a href="#cb2-27"></a></span>
+<span id="cb2-28"><a href="#cb2-28"></a>    <span class="at">@Override</span></span>
+<span id="cb2-29"><a href="#cb2-29"></a>    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">perimeter</span>() {</span>
+<span id="cb2-30"><a href="#cb2-30"></a>        <span class="kw">return</span> <span class="dv">4</span> * x;</span>
+<span id="cb2-31"><a href="#cb2-31"></a>    }</span>
+<span id="cb2-32"><a href="#cb2-32"></a>}</span>
+<span id="cb2-33"><a href="#cb2-33"></a></span>
+<span id="cb2-34"><a href="#cb2-34"></a><span class="co">// Now what if I want to add a area function to PlaneShape.</span></span>
+<span id="cb2-35"><a href="#cb2-35"></a><span class="co">// Of cause, I need to change the parent class PlaneShape to</span></span>
+<span id="cb2-36"><a href="#cb2-36"></a><span class="kw">public</span> <span class="kw">abstract</span> <span class="kw">class</span> PlaneShape {</span>
+<span id="cb2-37"><a href="#cb2-37"></a>    <span class="kw">public</span> <span class="kw">abstract</span> <span class="dt">double</span> <span class="fu">perimeter</span>();</span>
+<span id="cb2-38"><a href="#cb2-38"></a>    <span class="kw">public</span> <span class="kw">abstract</span> <span class="dt">double</span> <span class="fu">area</span>();</span>
+<span id="cb2-39"><a href="#cb2-39"></a>}</span>
+<span id="cb2-40"><a href="#cb2-40"></a><span class="co">// Now subclasses Triangle and Square does not work anymore,</span></span>
+<span id="cb2-41"><a href="#cb2-41"></a><span class="co">// as they do not implement method area.</span></span></code></pre></div>
+<h1 id="solving-expression-problem-with-rust">Solving expression problem with rust</h1>
+<h2 id="make-planeshape-open-to-extension">Make PlaneShape open to extension</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">trait</span> PlaneShape <span class="op">{</span>  <span class="op">}</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="kw">struct</span> Triangle(<span class="dt">f64</span><span class="op">,</span> <span class="dt">f64</span><span class="op">,</span> <span class="dt">f64</span>)<span class="op">,</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="kw">struct</span> Square(<span class="dt">f64</span>)<span class="op">;</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="kw">impl</span> PlaneShape <span class="kw">for</span> Triangle <span class="op">{}</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a></span>
+<span id="cb3-9"><a href="#cb3-9"></a><span class="kw">impl</span> PlaneShape <span class="kw">for</span> Square <span class="op">{}</span></span>
+<span id="cb3-10"><a href="#cb3-10"></a></span>
+<span id="cb3-11"><a href="#cb3-11"></a><span class="kw">fn</span> perimeter(shape<span class="op">:</span> <span class="kw">dyn</span> PlaneShape) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a>    <span class="pp">unimplemented!</span>(<span class="st">&quot;Now how do we pattern match a trait?&quot;</span>)<span class="op">;</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="implementing-a-perimeter-function-based-on-a-abstract-type-dyn-planeshape">Implementing a perimeter function based on a abstract type <code>dyn PlaneShape</code>?</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">fn</span> perimeter(shape<span class="op">:</span> <span class="kw">dyn</span> PlaneShape) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>    <span class="pp">unimplemented!</span>(<span class="st">&quot;Now how do we pattern match a trait?&quot;</span>)<span class="op">?</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="op">}</span></span></code></pre></div>
+<p>We now have a problem. How do we define perimeter based on a dynamic trait <code>PlaneShape</code>. If it is a concrete type called <code>Triangle</code>, this problem is simple. If it is a concrete type called <code>Square</code>, this problem is also simple. The problem is that we don’t know what this <code>PlaneShape</code> is exactly. We need some sort of patter match as in</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">match</span> shape <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>    Triangle(a<span class="op">,</span> b<span class="op">,</span> c) <span class="op">=&gt;</span> (a<span class="op">+</span>b<span class="op">+</span>c)<span class="op">,</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a>    Square(x) <span class="op">=&gt;</span> <span class="dv">4</span><span class="op">*</span>x<span class="op">,</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="op">}</span></span></code></pre></div>
+<p>It is a whack-a-mole game. We can extend PlaneShape to support new data types now, but we lost our ability to pattern matching on PlaneShapes, which is required to implement new operations.</p>
+<p>Not all hope has lost. In fact, you may have solved this problem yourself. You just don’t know the computer scientist in yourself.</p>
+<p>I will detour through haskell to let you have a better self-reflection (you are indeed a computer scientist who is good at solving this kind of foundamental problems).</p>
+<h2 id="type-classes-in-haskell">Type classes in haskell</h2>
+<p>A well known solution for the expression problem is haskell’s type classes (not coincidentally, the formulization of expression problem and the invention of type classes are both, to a large extent, contributed by <a href="https://en.wikipedia.org/wiki/Philip_Wadler">Philip L. Wadler</a>).</p>
+<h3 id="type-classes-vs-traits">Type classes vs traits</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">class</span> <span class="dt">Areable</span> shape <span class="kw">where</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>  <span class="co">-- calculates the shape's area</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="ot">  area ::</span> shape <span class="ot">-&gt;</span> <span class="dt">Double</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">trait</span> Areable <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>    <span class="kw">fn</span> area(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">f64</span><span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="type-classes-traits">Type classes &gt; traits</h3>
+<div class="sourceCode" id="cb8"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1"></a><span class="co">-- Create a data type Triangle with one operation perimeter</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="kw">data</span> <span class="dt">Triangle</span> <span class="ot">=</span> <span class="dt">Triangle</span> {<span class="ot"> a ::</span> <span class="dt">Double</span>,<span class="ot"> b ::</span> <span class="dt">Double</span>,<span class="ot"> c ::</span> <span class="dt">Double</span> }</span>
+<span id="cb8-3"><a href="#cb8-3"></a></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="kw">class</span> <span class="dt">Perimeterable</span> shape <span class="kw">where</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>  <span class="co">-- calculates the perimeter of the shape</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="ot">  perimeter ::</span> shape <span class="ot">-&gt;</span> <span class="dt">Double</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="kw">instance</span> <span class="dt">Perimeterable</span> <span class="dt">Triangle</span> <span class="kw">where</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a>  perimeter <span class="dt">Triangle</span> {a,b,c} <span class="ot">=</span> a <span class="op">+</span> b <span class="op">+</span> c</span>
+<span id="cb8-10"><a href="#cb8-10"></a></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="co">-- Add an operation</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="kw">class</span> <span class="dt">Areable</span> shape <span class="kw">where</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a>  <span class="co">-- calculates the shape's area</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a><span class="ot">  area ::</span> shape <span class="ot">-&gt;</span> <span class="dt">Double</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a></span>
+<span id="cb8-17"><a href="#cb8-17"></a><span class="kw">instance</span> <span class="dt">Areable</span> <span class="dt">Triangle</span> <span class="kw">where</span></span>
+<span id="cb8-18"><a href="#cb8-18"></a>  <span class="co">-- use Heron's formula to calculate area</span></span>
+<span id="cb8-19"><a href="#cb8-19"></a>  area <span class="dt">Triangle</span> {a, b, c} <span class="ot">=</span></span>
+<span id="cb8-20"><a href="#cb8-20"></a>    <span class="kw">let</span> s <span class="ot">=</span> (a <span class="op">+</span> b <span class="op">+</span> c) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb8-21"><a href="#cb8-21"></a>    <span class="kw">in</span> <span class="fu">sqrt</span> (s <span class="op">*</span> (s <span class="op">-</span> a) <span class="op">*</span> (s <span class="op">-</span> b) <span class="op">*</span> (s <span class="op">-</span> c))</span>
+<span id="cb8-22"><a href="#cb8-22"></a></span>
+<span id="cb8-23"><a href="#cb8-23"></a><span class="co">-- Add a data type</span></span>
+<span id="cb8-24"><a href="#cb8-24"></a></span>
+<span id="cb8-25"><a href="#cb8-25"></a><span class="kw">data</span> <span class="dt">Square</span> <span class="ot">=</span> <span class="dt">Square</span> {<span class="ot"> x ::</span> <span class="dt">Double</span> }</span>
+<span id="cb8-26"><a href="#cb8-26"></a></span>
+<span id="cb8-27"><a href="#cb8-27"></a><span class="co">-- Implement the new operation for the new type</span></span>
+<span id="cb8-28"><a href="#cb8-28"></a></span>
+<span id="cb8-29"><a href="#cb8-29"></a><span class="kw">instance</span> <span class="dt">Perimeterable</span> <span class="dt">Square</span> <span class="kw">where</span></span>
+<span id="cb8-30"><a href="#cb8-30"></a>  perimeter <span class="dt">Square</span> {x} <span class="ot">=</span> x <span class="op">*</span> <span class="dv">4</span></span>
+<span id="cb8-31"><a href="#cb8-31"></a></span>
+<span id="cb8-32"><a href="#cb8-32"></a><span class="kw">instance</span> <span class="dt">Areable</span> <span class="dt">Square</span> <span class="kw">where</span></span>
+<span id="cb8-33"><a href="#cb8-33"></a>  area <span class="dt">Square</span> {x} <span class="ot">=</span> x <span class="op">*</span> x</span></code></pre></div>
+<p>Actually, this only solve part of the problem, see <a href="https://eli.thegreenplace.net/2018/more-thoughts-on-the-expression-problem-in-haskell/">More thoughts on the Expression Problem in Haskell</a> for the fault (warning, the rabbit hole is deep).</p>
+<h3 id="type-classes-vs-traits-again">Type classes vs traits again</h3>
+<p>The crucial thing is</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">class</span> <span class="dt">Perimeterable</span> shape <span class="kw">where</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="ot">  perimeter ::</span> shape <span class="ot">-&gt;</span> <span class="dt">Double</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="kw">instance</span> <span class="dt">Perimeterable</span> <span class="dt">Triangle</span> <span class="kw">where</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>  perimeter <span class="dt">Triangle</span> {a,b,c} <span class="ot">=</span> a <span class="op">+</span> b <span class="op">+</span> c</span></code></pre></div>
+<p>Note that to instantiate <code>Triangle</code> as a <code>Perimeterable</code>, we passed the type <code>Triangle</code> to the function <code>perimeter</code>, this means that we can acutally use the type information and pattern matching to caculate perimeter. This is how we implement <code>fn perimeter(shape: dyn PlaneShape) -&gt; f64</code> with explicit type information.</p>
+<h3 id="the-missing-piece-in-a-rust-lego">The missing piece in a rust lego</h3>
+<p>Now, let’s look into rust. Pedagogically we need</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1"></a><span class="kw">fn</span> perimeter(shape<span class="op">:</span> <span class="kw">dyn</span> PlaneShape) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a>    <span class="pp">unimplemented!</span>(<span class="st">&quot;Now how do we pattern match a trait?&quot;</span>)<span class="op">?</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="op">}</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="co">// This still does not work as we need the concrete PlaneShape type to calculate perimeter, i.e. we need the next function</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="kw">fn</span> perimeter<span class="op">&lt;</span>X<span class="op">:</span> PlaneShape<span class="op">&gt;</span>(shape<span class="op">:</span> X) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span> <span class="op">}</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="co">// But this is not a generic function. It has been monomorphizated, and is nothing more than next function.</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a><span class="kw">fn</span> perimeter<span class="op">&lt;</span>Triangle<span class="op">:</span> PlaneShape<span class="op">&gt;</span>(shape<span class="op">:</span> Triangle) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a>    <span class="kw">match</span> shape <span class="op">{</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a>        Triangle(a<span class="op">,</span> b<span class="op">,</span> c) <span class="op">=&gt;</span> (a<span class="op">+</span>b<span class="op">+</span>c)<span class="op">,</span></span>
+<span id="cb10-12"><a href="#cb10-12"></a>    <span class="op">}</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a><span class="op">}</span></span>
+<span id="cb10-14"><a href="#cb10-14"></a></span>
+<span id="cb10-15"><a href="#cb10-15"></a><span class="co">// This is of no use as what we want is to extend the definition of perimeter to other PlaneShapes.</span></span>
+<span id="cb10-16"><a href="#cb10-16"></a><span class="kw">fn</span> perimeter(shape<span class="op">:</span> Triangle) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a>    <span class="kw">match</span> shape <span class="op">{</span></span>
+<span id="cb10-18"><a href="#cb10-18"></a>        Triangle(a<span class="op">,</span> b<span class="op">,</span> c) <span class="op">=&gt;</span> (a<span class="op">+</span>b<span class="op">+</span>c)<span class="op">,</span></span>
+<span id="cb10-19"><a href="#cb10-19"></a>    <span class="op">}</span></span>
+<span id="cb10-20"><a href="#cb10-20"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="some-solutions-for-rust">Some solutions for rust</h2>
+<p>So how do we pass a concrete type to a abstract trait? There are serveral ways to do that.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">trait</span> PlaneShape <span class="op">{}</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="kw">struct</span> Triangle <span class="op">{</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a>    a<span class="op">:</span> <span class="dt">f64</span><span class="op">,</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a>    b<span class="op">:</span> <span class="dt">f64</span><span class="op">,</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a>    c<span class="op">:</span> <span class="dt">f64</span><span class="op">,</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="op">}</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a></span>
+<span id="cb11-9"><a href="#cb11-9"></a><span class="kw">impl</span> PlaneShape <span class="kw">for</span> Triangle <span class="op">{}</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a></span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="co">// I will implement only the method ~perimeter~ for one type data ~Triangle~ below,</span></span>
+<span id="cb11-12"><a href="#cb11-12"></a><span class="co">// as it should be evident on how to extend both methods and data types.</span></span></code></pre></div>
+<h3 id="associated-type-for-traits">Associated type for traits</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb12-1"><a href="#cb12-1"></a><span class="co">// Solution 1: Associated type</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="kw">trait</span> PerimeterableAT <span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a>    <span class="kw">type</span> S: PlaneShape<span class="op">;</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a>    <span class="kw">fn</span> perimeter(shape<span class="op">:</span> <span class="dt">Self</span><span class="pp">::</span>S) <span class="op">-&gt;</span> <span class="dt">f64</span><span class="op">;</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="op">}</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a></span>
+<span id="cb12-7"><a href="#cb12-7"></a><span class="kw">impl</span> PerimeterableAT <span class="kw">for</span> Triangle <span class="op">{</span></span>
+<span id="cb12-8"><a href="#cb12-8"></a>    <span class="kw">type</span> S <span class="op">=</span> Triangle<span class="op">;</span></span>
+<span id="cb12-9"><a href="#cb12-9"></a>    <span class="kw">fn</span> perimeter(shape<span class="op">:</span> <span class="dt">Self</span><span class="pp">::</span>S) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb12-10"><a href="#cb12-10"></a>        shape<span class="op">.</span>a <span class="op">+</span> shape<span class="op">.</span>b <span class="op">+</span> shape<span class="op">.</span>c</span>
+<span id="cb12-11"><a href="#cb12-11"></a>    <span class="op">}</span></span>
+<span id="cb12-12"><a href="#cb12-12"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="bounded-generics-for-traits">Bounded generics for traits</h3>
+<div class="sourceCode" id="cb13"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb13-1"><a href="#cb13-1"></a><span class="co">// Solution 2: Bounded generics for traits</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="kw">trait</span> PerimeterableBG<span class="op">&lt;</span>S<span class="op">&gt;</span> <span class="kw">where</span> S<span class="op">:</span> PlaneShape <span class="op">{</span></span>
+<span id="cb13-3"><a href="#cb13-3"></a>    <span class="kw">fn</span> perimeter(shape<span class="op">:</span> S) <span class="op">-&gt;</span> <span class="dt">f64</span><span class="op">;</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="op">}</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="kw">impl</span> PerimeterableBG<span class="op">&lt;</span>Triangle<span class="op">&gt;</span> <span class="kw">for</span> Triangle <span class="op">{</span></span>
+<span id="cb13-7"><a href="#cb13-7"></a>    <span class="kw">fn</span> perimeter(shape<span class="op">:</span> Triangle) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb13-8"><a href="#cb13-8"></a>        shape<span class="op">.</span>a <span class="op">+</span> shape<span class="op">.</span>b <span class="op">+</span> shape<span class="op">.</span>c</span>
+<span id="cb13-9"><a href="#cb13-9"></a>    <span class="op">}</span></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="op">}</span></span></code></pre></div>
+<h3 id="generics-for-structs">Generics for structs</h3>
+<div class="sourceCode" id="cb14"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb14-1"><a href="#cb14-1"></a><span class="co">// Solution 3: Bounded generics for structs</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a><span class="kw">use</span> <span class="pp">std::marker::</span>PhantomData<span class="op">;</span></span>
+<span id="cb14-3"><a href="#cb14-3"></a></span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="kw">struct</span> PerimeterablePT<span class="op">&lt;</span>T<span class="op">&gt;</span> <span class="kw">where</span> T<span class="op">:</span> PlaneShape <span class="op">{</span></span>
+<span id="cb14-5"><a href="#cb14-5"></a>    _unused<span class="op">:</span> PhantomData<span class="op">&lt;</span>T<span class="op">&gt;,</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a><span class="op">}</span></span>
+<span id="cb14-7"><a href="#cb14-7"></a></span>
+<span id="cb14-8"><a href="#cb14-8"></a><span class="kw">impl</span> PerimeterablePT<span class="op">&lt;</span>Triangle<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb14-9"><a href="#cb14-9"></a>    <span class="kw">fn</span> perimeter(shape<span class="op">:</span> Triangle) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb14-10"><a href="#cb14-10"></a>        shape<span class="op">.</span>a <span class="op">+</span> shape<span class="op">.</span>b <span class="op">+</span> shape<span class="op">.</span>c</span>
+<span id="cb14-11"><a href="#cb14-11"></a>    <span class="op">}</span></span>
+<span id="cb14-12"><a href="#cb14-12"></a><span class="op">}</span></span></code></pre></div>
+<h2 id="a-simpler-solution-for-rust">A simpler solution for rust</h2>
+<p>Yes, all above solutions are complicated and awkward.</p>
+<p>And you are being deliberately led away from a simpler solution.</p>
+<p>For a good reason.</p>
+<h3 id="explicitly-typed-self-references">explicitly typed self references</h3>
+<div class="sourceCode" id="cb15"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw">trait</span> PlaneShape <span class="op">{</span>  <span class="op">}</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="kw">struct</span> Triangle <span class="op">{</span></span>
+<span id="cb15-4"><a href="#cb15-4"></a>    a<span class="op">:</span> <span class="dt">f64</span><span class="op">,</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a>    b<span class="op">:</span> <span class="dt">f64</span><span class="op">,</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a>    c<span class="op">:</span> <span class="dt">f64</span><span class="op">,</span></span>
+<span id="cb15-7"><a href="#cb15-7"></a><span class="op">}</span></span>
+<span id="cb15-8"><a href="#cb15-8"></a></span>
+<span id="cb15-9"><a href="#cb15-9"></a><span class="kw">impl</span> PlaneShape <span class="kw">for</span> Triangle <span class="op">{}</span></span>
+<span id="cb15-10"><a href="#cb15-10"></a></span>
+<span id="cb15-11"><a href="#cb15-11"></a><span class="kw">trait</span> Perimeterable <span class="op">{</span></span>
+<span id="cb15-12"><a href="#cb15-12"></a>    <span class="kw">fn</span> perimeter(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">f64</span><span class="op">;</span></span>
+<span id="cb15-13"><a href="#cb15-13"></a><span class="op">}</span></span>
+<span id="cb15-14"><a href="#cb15-14"></a></span>
+<span id="cb15-15"><a href="#cb15-15"></a><span class="kw">impl</span> Perimeterable <span class="kw">for</span> Triangle <span class="op">{</span></span>
+<span id="cb15-16"><a href="#cb15-16"></a>    <span class="kw">fn</span> perimeter(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">f64</span> <span class="op">{</span></span>
+<span id="cb15-17"><a href="#cb15-17"></a>        <span class="kw">self</span><span class="op">.</span>a <span class="op">+</span> <span class="kw">self</span><span class="op">.</span>b <span class="op">+</span> <span class="kw">self</span><span class="op">.</span>c</span>
+<span id="cb15-18"><a href="#cb15-18"></a>    <span class="op">}</span></span>
+<span id="cb15-19"><a href="#cb15-19"></a><span class="op">}</span></span></code></pre></div>
+<p>This is what is called explicitly typed self references, without which, the following code to extract data in a specific type would be impossible.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode rust"><code class="sourceCode rust"><span id="cb16-1"><a href="#cb16-1"></a><span class="kw">self</span><span class="op">.</span>a <span class="op">+</span> <span class="kw">self</span><span class="op">.</span>b <span class="op">+</span> <span class="kw">self</span><span class="op">.</span>c</span></code></pre></div>
+<p><code>self.a</code> implies that you are using the concrete type <code>Triangle</code> which implements the abstract trait <code>Perimeterable</code>.</p>
+<p>Many programming languages do not have the functionality to refer to a <code>Self</code> type in traits.</p>
+<h1 id="another-side-of-the-coin-solving-expression-problem-for-oop-languages">Another side of the coin (solving expression problem for OOP languages)</h1>
+<h2 id="remove-methods-from-planeshape">Remove methods from `PlaneShape`</h2>
+<p>The first thing is to remove all the methods from PlaneShape, otherwise we can’t extend new methods without modify the defintion of PlaneShape.</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb17-1"><a href="#cb17-1"></a><span class="kw">public</span> <span class="kw">abstract</span> <span class="kw">class</span> PlaneShape { }</span></code></pre></div>
+<h2 id="define-new-functions-on-a-planeshape-with-nothing-in-it-or-the-visitor-pattern">Define new functions on a `PlaneShape` with nothing in it (or the visitor pattern)</h2>
+<p>Chapter Visitor of the book <code>Design Patterns: Elements of Reusable Object-Oriented Software</code></p>
+<blockquote>
+<p>Intent: Represent an operation to be performed on the elements of an object structure. Visitor lets you define a new operation without changing the classes of the elements on which it operates.</p>
+</blockquote>
+<h3 id="making-oop-more-fp">Making oop more fp</h3>
+<div class="sourceCode" id="cb18"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb18-1"><a href="#cb18-1"></a><span class="kw">public</span> <span class="kw">abstract</span> <span class="kw">class</span> PlaneShape {</span>
+<span id="cb18-2"><a href="#cb18-2"></a>    <span class="kw">public</span> <span class="kw">abstract</span> <span class="dt">void</span> <span class="fu">accept</span>(PlaneShapeVisitor visitor);</span>
+<span id="cb18-3"><a href="#cb18-3"></a>}</span>
+<span id="cb18-4"><a href="#cb18-4"></a></span>
+<span id="cb18-5"><a href="#cb18-5"></a><span class="kw">public</span> <span class="kw">class</span> Triangle <span class="kw">extends</span> PlaneShape {</span>
+<span id="cb18-6"><a href="#cb18-6"></a>    <span class="kw">private</span> <span class="dt">double</span> a, b, c;</span>
+<span id="cb18-7"><a href="#cb18-7"></a></span>
+<span id="cb18-8"><a href="#cb18-8"></a>    <span class="kw">public</span> <span class="fu">Triangle</span>(<span class="dt">double</span> a, <span class="dt">double</span> b, <span class="dt">double</span> c) {</span>
+<span id="cb18-9"><a href="#cb18-9"></a>        <span class="kw">this</span>.<span class="fu">a</span> = a;</span>
+<span id="cb18-10"><a href="#cb18-10"></a>        <span class="kw">this</span>.<span class="fu">b</span> = b;</span>
+<span id="cb18-11"><a href="#cb18-11"></a>        <span class="kw">this</span>.<span class="fu">c</span> = c;</span>
+<span id="cb18-12"><a href="#cb18-12"></a>    }</span>
+<span id="cb18-13"><a href="#cb18-13"></a></span>
+<span id="cb18-14"><a href="#cb18-14"></a>    <span class="at">@Override</span></span>
+<span id="cb18-15"><a href="#cb18-15"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">accept</span>(PlaneShapeVisitor visitor) {</span>
+<span id="cb18-16"><a href="#cb18-16"></a>        visitor.<span class="fu">visitTriangle</span>(<span class="kw">this</span>);</span>
+<span id="cb18-17"><a href="#cb18-17"></a>    }</span>
+<span id="cb18-18"><a href="#cb18-18"></a>}</span>
+<span id="cb18-19"><a href="#cb18-19"></a></span>
+<span id="cb18-20"><a href="#cb18-20"></a><span class="kw">public</span> <span class="kw">class</span> Square <span class="kw">extends</span> PlaneShape {</span>
+<span id="cb18-21"><a href="#cb18-21"></a>    <span class="kw">private</span> <span class="dt">double</span> x;</span>
+<span id="cb18-22"><a href="#cb18-22"></a></span>
+<span id="cb18-23"><a href="#cb18-23"></a>    <span class="kw">public</span> <span class="fu">Square</span>(<span class="dt">double</span> x) {</span>
+<span id="cb18-24"><a href="#cb18-24"></a>        <span class="kw">this</span>.<span class="fu">x</span> = x;</span>
+<span id="cb18-25"><a href="#cb18-25"></a>    }</span>
+<span id="cb18-26"><a href="#cb18-26"></a></span>
+<span id="cb18-27"><a href="#cb18-27"></a>    <span class="at">@Override</span></span>
+<span id="cb18-28"><a href="#cb18-28"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">accept</span>(PlaneShapeVisitor visitor) {</span>
+<span id="cb18-29"><a href="#cb18-29"></a>        visitor.<span class="fu">visitSquare</span>(<span class="kw">this</span>);</span>
+<span id="cb18-30"><a href="#cb18-30"></a>    }</span>
+<span id="cb18-31"><a href="#cb18-31"></a>}</span>
+<span id="cb18-32"><a href="#cb18-32"></a></span>
+<span id="cb18-33"><a href="#cb18-33"></a><span class="kw">public</span> <span class="kw">interface</span> PlaneShapeVisitor {</span>
+<span id="cb18-34"><a href="#cb18-34"></a>    <span class="dt">void</span> <span class="fu">visitTriangle</span>(Triangle triangle);</span>
+<span id="cb18-35"><a href="#cb18-35"></a>    <span class="dt">void</span> <span class="fu">visitSquare</span>(Square square);</span>
+<span id="cb18-36"><a href="#cb18-36"></a>}</span>
+<span id="cb18-37"><a href="#cb18-37"></a></span>
+<span id="cb18-38"><a href="#cb18-38"></a><span class="kw">public</span> <span class="kw">class</span> PerimeterVisitor <span class="kw">implements</span> PlaneShapeVisitor {</span>
+<span id="cb18-39"><a href="#cb18-39"></a>    <span class="kw">private</span> <span class="dt">double</span> value;</span>
+<span id="cb18-40"><a href="#cb18-40"></a></span>
+<span id="cb18-41"><a href="#cb18-41"></a>    <span class="kw">public</span> <span class="dt">double</span> <span class="fu">getValue</span>() {</span>
+<span id="cb18-42"><a href="#cb18-42"></a>        <span class="kw">return</span> value;</span>
+<span id="cb18-43"><a href="#cb18-43"></a>    }</span>
+<span id="cb18-44"><a href="#cb18-44"></a></span>
+<span id="cb18-45"><a href="#cb18-45"></a>    <span class="at">@Override</span></span>
+<span id="cb18-46"><a href="#cb18-46"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">visitTriangle</span>(Triangle triangle) {</span>
+<span id="cb18-47"><a href="#cb18-47"></a>        <span class="dt">double</span> a = triangle.<span class="fu">a</span>;</span>
+<span id="cb18-48"><a href="#cb18-48"></a>        <span class="dt">double</span> b = triangle.<span class="fu">b</span>;</span>
+<span id="cb18-49"><a href="#cb18-49"></a>        <span class="dt">double</span> c = triangle.<span class="fu">c</span>;</span>
+<span id="cb18-50"><a href="#cb18-50"></a>        value = a + b + c;</span>
+<span id="cb18-51"><a href="#cb18-51"></a>    }</span>
+<span id="cb18-52"><a href="#cb18-52"></a></span>
+<span id="cb18-53"><a href="#cb18-53"></a>    <span class="at">@Override</span></span>
+<span id="cb18-54"><a href="#cb18-54"></a>    <span class="kw">public</span> <span class="dt">void</span> <span class="fu">visitSquare</span>(Square square) {</span>
+<span id="cb18-55"><a href="#cb18-55"></a>        <span class="dt">double</span> x = square.<span class="fu">x</span>;</span>
+<span id="cb18-56"><a href="#cb18-56"></a>        value = <span class="dv">4</span> * x;</span>
+<span id="cb18-57"><a href="#cb18-57"></a>    }</span>
+<span id="cb18-58"><a href="#cb18-58"></a>}</span></code></pre></div>
+<h3 id="try-fp">Try fp</h3>
+<p>Now we are able to write</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb19-1"><a href="#cb19-1"></a>Triangle triangle = <span class="kw">new</span> <span class="fu">Triangle</span>(<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>);</span>
+<span id="cb19-2"><a href="#cb19-2"></a>Square square = <span class="kw">new</span> <span class="fu">Square</span>(<span class="dv">2</span>);</span>
+<span id="cb19-3"><a href="#cb19-3"></a></span>
+<span id="cb19-4"><a href="#cb19-4"></a>PerimeterVisitor visitor = <span class="kw">new</span> <span class="fu">PerimeterVisitor</span>();</span>
+<span id="cb19-5"><a href="#cb19-5"></a>triangle.<span class="fu">accept</span>(visitor);</span>
+<span id="cb19-6"><a href="#cb19-6"></a><span class="dt">double</span> trianglePerimeter = visitor.<span class="fu">getValue</span>(); <span class="co">// 12.0</span></span>
+<span id="cb19-7"><a href="#cb19-7"></a></span>
+<span id="cb19-8"><a href="#cb19-8"></a>visitor = <span class="kw">new</span> <span class="fu">PerimeterVisitor</span>();</span>
+<span id="cb19-9"><a href="#cb19-9"></a>square.<span class="fu">accept</span>(visitor);</span>
+<span id="cb19-10"><a href="#cb19-10"></a><span class="dt">double</span> squarePerimeter = visitor.<span class="fu">getValue</span>(); <span class="co">// 8.0</span></span></code></pre></div>
+<h2 id="make-visitors-generic">Make visitors generic</h2>
+<h3 id="flipping-to-the-other-side-of-the-coin">Flipping to the other side of the coin</h3>
+<p>Using visitor pattern actually does not solve the problem. It’s only turning a problem of extending operators into a problem of extending data types.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb20-1"><a href="#cb20-1"></a><span class="kw">public</span> <span class="kw">interface</span> PlaneShapeVisitor {</span>
+<span id="cb20-2"><a href="#cb20-2"></a>    <span class="dt">void</span> <span class="fu">visitTriangle</span>(Triangle triangle);</span>
+<span id="cb20-3"><a href="#cb20-3"></a>    <span class="dt">void</span> <span class="fu">visitSquare</span>(Square square);</span>
+<span id="cb20-4"><a href="#cb20-4"></a>}</span></code></pre></div>
+<p>Here we hardcoded 2 <code>PlaneShape</code> <code>Triangle</code> and <code>Square</code>, but we need to accept any <code>PlaneShape</code>. How can we visit any generic <code>PlaneShape</code>? i.e. how to do this?</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode java"><code class="sourceCode java"><span id="cb21-1"><a href="#cb21-1"></a><span class="kw">public</span> <span class="kw">interface</span> PlaneShapeVisitor&lt;T <span class="kw">extends</span> PlaneShape&gt; {</span>
+<span id="cb21-2"><a href="#cb21-2"></a>    <span class="dt">void</span> visit&lt;T&gt;(T shape);</span>
+<span id="cb21-3"><a href="#cb21-3"></a>}</span></code></pre></div>
+<h3 id="solution">Solution</h3>
+<p>The above problem is reminiscent of our rust journey to expression problem. We need to some how inject a concrete type <code>PlaneShape</code> into <code>visit</code> function.</p>
+<h1 id="more-methods">More methods</h1>
+<h2 id="multiple-dispatch">multiple dispatch</h2>
+<p>The crux of the problem. Add a new method and dispatch this method one different types (these types are not predefined, we can add a new type as we wish).</p>
+<h2 id="scala">scala</h2>
+
+
+    </section>
+  </article>
+  
+</body>
+</html>
