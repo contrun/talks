@@ -3,6 +3,12 @@
 #+SLUG: take-all-your-belongings-with-you
 #+OPTIONS: H:5
 
+# 标题：Take All Your Belongings with You: A Touch of Personal Computing
+
+# 介绍：我将会和大家分享一点微小的 self-hosting （自托管）（或者更广泛地个人计算，personal computing）经验。我会先宽泛地介绍一下 personal computing，然后展示一下个人计算有什么个人的，为什么使用云端服务（别人的电脑）无法满足我的个人需求，我搭建了哪些服务来满足我高度定制化的需求。最后我会根据大家的意见选择某些主题（包括远程开发、数据备份、安全、数据同步等）谈谈我的经验。分享的材料可见于 https://self/ 。
+
+# 另：作为预热，大家可以看看 Stephen Wolfram 关于他的个人计算的基础设施的文章 https://writings.stephenwolfram.com/2019/02/seeking-the-productive-life-some-details-of-my-personal-infrastructure/ ，也可以点击 https://redacted/ 查看我现在搭建的一些 web 服务（趁现在网站还没挂）。
+
 * Introduction
 [[https://www.vice.com/en/article/pkb4ng/meet-the-self-hosters-taking-back-the-internet-one-server-at-a-time][Meet the Self-Hosters, Taking Back the Internet One Server at a Time]]
 + What is self hosting?
