@@ -35,7 +35,6 @@
 
 <div class="toc"><div class="header">Table of Contents</div>
 <ul>
-<li><a href="#references">References</a></li>
 <li><a href="#the-intrinsic-tension-between-extending-data-types-and-operations-of-data-types">The intrinsic tension between extending data types and operations of data types</a>
 <ul>
 <li><a href="#operations-are-open-for-extension-but-data-types-are-closed-for-modification-aka-functional-programming">Operations are open for extension, but data types are closed for modification (aka functional programming)</a></li>
@@ -79,22 +78,16 @@
 </ul></li>
 <li><a href="#more-methods">More methods</a>
 <ul>
+<li><a href="#solve-expression-problem-with-other-language">Solve expression problem with other language</a>
+<ul>
 <li><a href="#multiple-dispatch">multiple dispatch</a></li>
 <li><a href="#scala">scala</a></li>
+<li><a href="#java">java</a></li>
+</ul></li>
+<li><a href="#generic-references">Generic references</a></li>
 </ul></li>
 </ul>
 </div>
-<h1 id="references">References</h1>
-<ul>
-<li><p><a href="https://en.wikipedia.org/wiki/Expression_problem">Expression problem - Wikipedia</a></p></li>
-<li><p><a href="https://gist.github.com/chrisdone/7e07b3a90474542c9d1ebef033c1ee6e#file-expression_problem-hs-L6">Solving the Expression Problem with Haskell · GitHub</a></p></li>
-<li><p><a href="https://langdev.stackexchange.com/questions/1402/how-do-you-solve-expression-problem-in-your-language-design">syntax - How do you solve Expression Problem in your language design? - Programming Language Design and Implementation Stack Exchange</a></p></li>
-<li><p><a href="https://www.youtube.com/watch?v=FWW87fvBKJg">Dr. Ralf Laemmel Advanced FP - The Expression Problem - YouTube</a></p></li>
-<li><p><a href="https://stackoverflow.com/questions/3596366/what-is-the-expression-problem">programming languages - What is the ‘expression problem’? - Stack Overflow</a></p></li>
-<li><p><a href="https://max.computer/blog/solving-the-expression-problem-in-clojure/">Max.Computer - Solving the Expression Problem in Clojure</a></p></li>
-<li><p><a href="https://eli.thegreenplace.net/2016/the-expression-problem-and-its-solutions/">The Expression Problem and its solutions - Eli Bendersky’s website</a></p></li>
-<li><p><a href="https://eli.thegreenplace.net/2018/more-thoughts-on-the-expression-problem-in-haskell/">More thoughts on the Expression Problem in Haskell - Eli Bendersky’s website</a></p></li>
-</ul>
 <h1 id="the-intrinsic-tension-between-extending-data-types-and-operations-of-data-types">The intrinsic tension between extending data types and operations of data types</h1>
 <p>Algorithms + Data Structures = Programs</p>
 <p><a href="https://en.wikipedia.org/wiki/Open%E2%80%93closed_principle">Open–closed principle</a></p>
@@ -616,9 +609,25 @@
 <span id="cb23-114"><a href="#cb23-114"></a>}</span></code></pre></div></li>
 </ol>
 <h1 id="more-methods">More methods</h1>
-<h2 id="multiple-dispatch">multiple dispatch</h2>
-<p>The crux of the problem. Add a new method and dispatch this method one different types (these types are not predefined, we can add a new type as we wish).</p>
-<h2 id="scala">scala</h2>
+<h2 id="solve-expression-problem-with-other-language">Solve expression problem with other language</h2>
+<h3 id="multiple-dispatch">multiple dispatch</h3>
+<p>The crux of the problem. Add a new method and dispatch this method one different types (these types are not predefined, we can add a new type as we wish). We can also solve expression problem with multiple dispatch in clojure and julia.</p>
+<h3 id="scala">scala</h3>
+<p><a href="https://www.scala-lang.org/docu/files/TheExpressionProblem.pdf">Types in Object-Oriented Languages The Expression Problem in Scala</a> (quite a few solutions to expression problem in scala)</p>
+<h3 id="java">java</h3>
+<p><a href="https://www.cs.utexas.edu/~wcook/Drafts/2012/ecoop2012.pdf">Extensibility for the Masses Practical Extensibility with Object Algebras</a> (They do not need the most advanced and difficult features of generics available in those languages, e.g. F-bounded quantification [6], wild-cards [44] or variance annotations. As a result, object algebras are applicable to a wide range of programming languages that have basic support for generics).</p>
+<h2 id="generic-references">Generic references</h2>
+<ul>
+<li><p><a href="https://en.wikipedia.org/wiki/Expression_problem">Expression problem - Wikipedia</a></p></li>
+<li><p><a href="https://github.com/combinators/expression-problem">combinators/expression-problem: Synthesize a number of approaches (in multiple languages) that address the Expression Problem</a></p></li>
+<li><p><a href="https://gist.github.com/chrisdone/7e07b3a90474542c9d1ebef033c1ee6e#file-expression_problem-hs-L6">Solving the Expression Problem with Haskell · GitHub</a></p></li>
+<li><p><a href="https://langdev.stackexchange.com/questions/1402/how-do-you-solve-expression-problem-in-your-language-design">syntax - How do you solve Expression Problem in your language design? - Programming Language Design and Implementation Stack Exchange</a></p></li>
+<li><p><a href="https://www.youtube.com/watch?v=FWW87fvBKJg">Dr. Ralf Laemmel Advanced FP - The Expression Problem - YouTube</a></p></li>
+<li><p><a href="https://stackoverflow.com/questions/3596366/what-is-the-expression-problem">programming languages - What is the ‘expression problem’? - Stack Overflow</a></p></li>
+<li><p><a href="https://max.computer/blog/solving-the-expression-problem-in-clojure/">Max.Computer - Solving the Expression Problem in Clojure</a></p></li>
+<li><p><a href="https://eli.thegreenplace.net/2016/the-expression-problem-and-its-solutions/">The Expression Problem and its solutions - Eli Bendersky’s website</a></p></li>
+<li><p><a href="https://eli.thegreenplace.net/2018/more-thoughts-on-the-expression-problem-in-haskell/">More thoughts on the Expression Problem in Haskell - Eli Bendersky’s website</a></p></li>
+</ul>
 
 
     </section>
