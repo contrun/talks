@@ -6,23 +6,6 @@
 
 # 考虑下面的具体例子可以让我们更容易地从直观上理解 expression problem。假设我们的代码库里面有一个用于计算三角形周长的模块，我们现在要扩展这个模块。我们想要把数据结构扩展到其他的平面图形，比如正方形；我们还想要把算法扩展到其他的几何公式，比如说面积。但是处于种种原因，我们不希望修改这个模块的任何代码。大家可以考虑一下，怎么样用自己熟悉的编程语言（比如 rust 和 java）做到这件事情。我们会发现，面向对象编程语言如 java 可以很容易地增加正方形到平面图形类里面，而函数式编程语言如 rust 可以很容易地增加面积算法。但是两者都不能很轻易地既扩展数据类型又扩展算法。如果你发现你可以很轻易地用某个语言同时实现这两件事情，那么我确信，第一这个语言的表达能力很强，第二你对这个语言的理解很深。
 
-* References
-- [[https://en.wikipedia.org/wiki/Expression_problem][Expression problem - Wikipedia]]
-
-- [[https://gist.github.com/chrisdone/7e07b3a90474542c9d1ebef033c1ee6e#file-expression_problem-hs-L6][Solving the Expression Problem with Haskell · GitHub]]
-
-- [[https://langdev.stackexchange.com/questions/1402/how-do-you-solve-expression-problem-in-your-language-design][syntax - How do you solve Expression Problem in your language design? - Programming Language Design and Implementation Stack Exchange]]
-
-- [[https://www.youtube.com/watch?v=FWW87fvBKJg][Dr. Ralf Laemmel Advanced FP - The Expression Problem - YouTube]]
-
-- [[https://stackoverflow.com/questions/3596366/what-is-the-expression-problem][programming languages - What is the 'expression problem'? - Stack Overflow]]
-
-- [[https://max.computer/blog/solving-the-expression-problem-in-clojure/][Max.Computer - Solving the Expression Problem in Clojure]]
-
-- [[https://eli.thegreenplace.net/2016/the-expression-problem-and-its-solutions/][The Expression Problem and its solutions - Eli Bendersky's website]]
-
-- [[https://eli.thegreenplace.net/2018/more-thoughts-on-the-expression-problem-in-haskell/][More thoughts on the Expression Problem in Haskell - Eli Bendersky's website]]
-
 * The intrinsic tension between extending data types and operations of data types
 
 Algorithms + Data Structures = Programs
@@ -698,8 +681,34 @@ final class Main {
 
 # * extension methods
 
-** multiple dispatch
+** Solve expression problem with other language
 
+*** multiple dispatch
 The crux of the problem. Add a new method and dispatch this method one different types (these types are not predefined, we can add a new type as we wish).
+We can also solve expression problem with multiple dispatch in clojure and julia.
 
-** scala
+*** scala
+[[https://www.scala-lang.org/docu/files/TheExpressionProblem.pdf][Types in Object-Oriented Languages The Expression Problem in Scala]] (quite a few solutions to expression problem in scala)
+
+*** java
+[[https://www.cs.utexas.edu/~wcook/Drafts/2012/ecoop2012.pdf][Extensibility for the Masses Practical Extensibility with Object Algebras]] (They do not need the most advanced and difficult features of generics available in those languages, e.g. F-bounded quantification [6], wild-cards [44] or variance annotations. As a result, object algebras are applicable to a wide range of programming languages that have basic support for generics).
+
+** Generic references
+
+- [[https://en.wikipedia.org/wiki/Expression_problem][Expression problem - Wikipedia]]
+
+- [[https://github.com/combinators/expression-problem][combinators/expression-problem: Synthesize a number of approaches (in multiple languages) that address the Expression Problem]]
+
+- [[https://gist.github.com/chrisdone/7e07b3a90474542c9d1ebef033c1ee6e#file-expression_problem-hs-L6][Solving the Expression Problem with Haskell · GitHub]]
+
+- [[https://langdev.stackexchange.com/questions/1402/how-do-you-solve-expression-problem-in-your-language-design][syntax - How do you solve Expression Problem in your language design? - Programming Language Design and Implementation Stack Exchange]]
+
+- [[https://www.youtube.com/watch?v=FWW87fvBKJg][Dr. Ralf Laemmel Advanced FP - The Expression Problem - YouTube]]
+
+- [[https://stackoverflow.com/questions/3596366/what-is-the-expression-problem][programming languages - What is the 'expression problem'? - Stack Overflow]]
+
+- [[https://max.computer/blog/solving-the-expression-problem-in-clojure/][Max.Computer - Solving the Expression Problem in Clojure]]
+
+- [[https://eli.thegreenplace.net/2016/the-expression-problem-and-its-solutions/][The Expression Problem and its solutions - Eli Bendersky's website]]
+
+- [[https://eli.thegreenplace.net/2018/more-thoughts-on-the-expression-problem-in-haskell/][More thoughts on the Expression Problem in Haskell - Eli Bendersky's website]]
