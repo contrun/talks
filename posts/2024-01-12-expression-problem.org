@@ -487,8 +487,187 @@ public interface PlaneShapeVisitor<T extends PlaneShape> {
 }
 #+end_src
 
-*** Solution
+*** Solution with Java
 The above problem is reminiscent of our rust journey to expression problem. We need to some how inject a concrete type ~PlaneShape~ into ~visit~ function.
+
+**** Wadler's original solution in [[https://homepages.inf.ed.ac.uk/wadler/gj/][generic java]]
+
+#+begin_src java
+class LangF<This extends LangF<This>> {
+  interface Visitor<R> {
+    public R forNum(int n);
+  }
+  interface Exp {
+    public <R> R visit(This.Visitor<R> v);
+  }
+  class Num implements Exp {
+    protected final int n_;
+    public Num(int n) {n_=n;}
+    public <R> R visit(This.Visitor<R> v) {
+      return v.forNum(n_);
+    }
+  }
+  class Eval implements Visitor<Integer> {
+    public Integer forNum(int n) {
+      return new Integer(n);
+    }
+  }
+}
+final class Lang extends LangF<Lang> {}
+
+class Lang2F<This extends Lang2F<This>> extends LangF<This> {
+  interface Visitor<R> extends LangF<This>.Visitor<R> {
+    public R forPlus(This.Exp e1, This.Exp e2);
+  }
+  class Plus implements Exp {
+    protected final This.Exp e1_,e2_;
+    public Plus(This.Exp e1, This.Exp e2) {e1_=e1; e2_=e2;}
+    public <R> R visit(This.Visitor<R> v) {
+      return v.forPlus(e1_,e2_);
+    }
+  }
+  class Eval extends LangF<This>.Eval implements Visitor<Integer> {
+    public Integer forPlus(This.Exp e1, This.Exp e2) {
+      return new Integer(
+        e1.visit(this).intValue() + e2.visit(this).intValue()
+      );
+    }
+  }
+  class Show implements Visitor<String> {
+    public String forNum(int n) {
+      return Integer.toString(n);
+    }
+    public String forPlus(This.Exp e1, This.Exp e2) {
+      return "(" + e1.visit(this) + "+" + e2.visit(this) +")";
+    }
+  }
+}
+final class Lang2 extends Lang2F<Lang2> {}
+#+end_src
+
+**** +Modern java+ Java pseudocode
+As I mentioned, if you can solve expression problem in a language easily, then
+1). The expressiveness of this language is excellent
+2). You have mastery of the language.
+
+Either I am a novice or java is simply not expressive enough, I can't solve expression problem easily even with the hints from Wadler 30 years ago.
+
+#+begin_src java
+// class Module1F<This extends Module1F<This>> with
+// final class Module1 extends Module1F<Module1> {}
+// can be used to make This type variable in Module1F refer to exactly the
+// same class (instead of possibly subclasses).
+// Quoting The Expression Problem by Philip Wadler
+// This use of `This' is the standard trick to provide accurate static typing in the prescence of subtypes (sometimes called MyType or ThisType).
+// See also Is there a way to refer to the current type with a type variable?
+// https://stackoverflow.com/questions/7354740/is-there-a-way-to-refeclass
+class Module1F<This extends Module1F<This>> {
+    // A Visitor trait that is bounded by the trait Module1F.
+    // We may think this as a Visitor specialized to the PlaneShape defined below.
+    // Quoting The Expression Problem by Philip Wadler
+    // The key trick here is the use of This.Exp and This.Visitor, via the
+    // mechanism described in `Do parametric types beat virtual types?'.
+    // Recall that mechanism allows a type variable to be indexed by any
+    // inner class defined in the variable's bound.
+    interface Visitor<R> {
+        public R forTriangle(Double a, Double b, Double c);
+    }
+
+    // The data type we want to extend.
+    interface PlaneShape {
+        // Instead of passing a generic Visitor to this function, we pass a
+        // This.Visitor.
+        // This sibling interface Visitor may use methods specific to some data
+        // variants,
+        // e.g. forTriangle method specific to Triangles here!
+
+        // There is actually an error in the code below. The error is:
+        // Cannot make a static reference to the non-static type This Java (536871434),
+        // which as far as I know means that This.Visitor<R> is not a static type,
+        // and accessing This.Visitor<R> from a static context is not allowed.
+        public <R> R visit(This.Visitor<R> v);
+    }
+
+    // A data type variant of the PlaneShape interface.
+    class Triangle implements PlaneShape {
+        protected final Double a_, b_, c_;
+
+        public Triangle(Double a, Double b, Double c) {
+            a_ = a;
+            b_ = b;
+            c_ = c;
+        }
+
+        // The public entry point for the visitor, used to run a specific operator for
+        // this data variant.
+        public <R> R visit(Visitor<R> v) {
+            return v.forTriangle(a_, b_, c_);
+        }
+    }
+
+    // Implement an operator based on visitor pattern.
+    class Perimeter implements Visitor<Double> {
+        public Double forTriangle(Double a, Double b, Double c) {
+            return a + b + c;
+        }
+    }
+}
+
+final class Module1 extends Module1F<Module1> {
+}
+
+class Module2F<This extends Module2F<This>> extends Module1F<This> {
+    interface Visitor<R> extends Module1F.Visitor<R> {
+        public R forSquare(Double x);
+    }
+
+    class Square implements PlaneShape {
+        protected final Double x_;
+
+        public Square(Double x) {
+            x_ = x;
+        }
+
+        public <R> R visit(Visitor<R> v) {
+            return v.forSquare(x_);
+        }
+    }
+
+    class Perimeter extends Module1F<This>.Perimeter implements Visitor<Double> {
+        public Double forSquare(Double x) {
+            return 4 * x;
+        }
+    }
+
+    class Area implements Visitor<Double> {
+        public Double forTriangle(Double a, Double b, Double c) {
+            Double s = (a + b + c) / 2.0;
+            Double area = Math.sqrt(s * (s - a) * (s - b) * (s - c));
+            return area;
+        }
+
+        public Double forSquare(Double x) {
+            return x * x;
+        }
+    }
+}
+
+final class Module2 extends Module2F<Module2> {
+}
+
+final class Main {
+    static public void main(String[] args) {
+        Module2 m1 = new Module2();
+        Module2.PlaneShape e1 = m1.new Triangle(3.0, 4.0, 5.0);
+        System.out.println("Perimeter: " + e1.visit(m2.new Perimeter()));
+
+        Module2 m2 = new Module2();
+        Module2.PlaneShape e2 = m2.new Square(3.0);
+        System.out.println("Perimeter: " + e2.visit(m2.new Perimeter()));
+        System.out.println("Area: " + e2.visit(m2.new Area()));
+    }
+}
+#+end_src
 
 * More methods
 
